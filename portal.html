@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NK Academy – Answer Paper Review Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+:root{
+  --nv:#0B1428;--nvl:#14274D;--gd:#C9A84C;--gdl:#E2CC8A;--g100:#FAF3DC;
+  --bg:#F5F3FF;--wh:#FFF;--tx:#0A0D14;--mi:#3A4050;--mu:#6A7085;
+  --gr:#1FAA6A;--grb:#E6F7EF;--rd:#E24B4A;--rdb:#FEECEC;
+  --bl:#2B7FE0;--blb:#EAF2FD;--pu:#7C3AED;--pub:#F5F0FF;
+  --br:#E5E2F0;--r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font-family:'DM Sans',sans-serif}
+img{max-width:100%}
+
+/* ── SCREEN SYSTEM ── */
+.screen{display:none;animation:fadeUp .35s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ── NAV ── */
+.nav{background:var(--nv);padding:0 1.5rem;box-shadow:0 2px 16px rgba(0,0,0,.4);position:sticky;top:0;z-index:200}
+.ni{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:62px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.lgbdg{width:38px;height:38px;background:linear-gradient(135deg,var(--gd),#8B6914);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:17px;color:var(--nv)}
+.lgname{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:19px;color:#fff}
+.lgname small{display:block;font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:500;color:var(--gdl);letter-spacing:1.8px;text-transform:uppercase}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{color:rgba(255,255,255,.7);font-size:13px;font-weight:500;padding:7px 12px;border-radius:7px;transition:all .2s;cursor:pointer}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.1)}
+.nav-links a.act{color:var(--gdl);font-weight:600}
+#adminNavBtn{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gdl)!important}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.ham span{width:22px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+@media(max-width:768px){
+  .nav-links{display:none;position:fixed;top:62px;left:0;right:0;background:var(--nv);flex-direction:column;padding:1rem;gap:4px;z-index:199}
+  .nav-links.open{display:flex}
+  .ham{display:flex}
+}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,var(--nv) 0%,#14274D 60%,#1A3366 100%);padding:4rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-content{position:relative;z-index:1;max-width:680px;margin:0 auto}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:700;color:var(--gdl);letter-spacing:.5px;margin-bottom:1.4rem}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3rem);font-weight:700;color:#fff;line-height:1.15;margin-bottom:.8rem}
+.hero h1 em{font-style:italic;color:var(--gdl)}
+.hero p{font-size:1rem;color:rgba(255,255,255,.65);margin-bottom:2.2rem;line-height:1.8}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.hbtn{padding:14px 28px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px;transition:all .25s}
+.hbtn-gold{background:var(--gd);color:var(--nv)}.hbtn-gold:hover{background:var(--gdl);transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.35)}
+.hbtn-outline{background:transparent;border:2px solid rgba(255,255,255,.3);color:#fff}.hbtn-outline:hover{border-color:#fff;background:rgba(255,255,255,.07)}
+.hbtn-ghost{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--gdl);font-size:13px;padding:10px 20px}.hbtn-ghost:hover{background:rgba(201,168,76,.2)}
+
+/* ── INFO STRIP ── */
+.info-strip{background:var(--nv);border-top:1px solid rgba(201,168,76,.15);padding:.9rem 1.5rem}
+.info-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.info-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(255,255,255,.6);font-weight:500}
+.info-dot{width:6px;height:6px;border-radius:50%;background:var(--gr);flex-shrink:0}
+
+/* ── WRAPPER ── */
+.wrap{max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+.wrap-wide{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── CARDS ── */
+.card{background:var(--wh);border:1px solid var(--br);border-radius:var(--r);padding:2rem;margin-bottom:1.2rem}
+.card-sm{padding:1.4rem}
+.card h2{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--nv);margin-bottom:.3rem}
+.card .sub{font-size:13px;color:var(--mu);margin-bottom:1.4rem}
+.ch{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1.2rem}
+
+/* ── FORM ── */
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--mi);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px}
+.fg .req{color:var(--rd);margin-left:2px}
+.fi{width:100%;padding:11px 14px;background:var(--bg);border:1.5px solid var(--br);border-radius:9px;font-size:14px;color:var(--tx);outline:none;transition:border .2s}
+.fi:focus{border-color:var(--gd);background:#fff}
+.fi.ta{resize:vertical;min-height:70px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* ── SUBJECT CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 16px;border-radius:100px;border:1.5px solid var(--br);font-size:13px;font-weight:600;cursor:pointer;background:var(--bg);color:var(--mi);transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--gd)}
+.chip.on{background:var(--nv);color:var(--gdl);border-color:var(--nv)}
+
+/* ── UPLOAD ZONES ── */
+.uz{border:2px dashed var(--br);border-radius:var(--r);padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg)}
+.uz:hover,.uz.drag{border-color:var(--gd);background:var(--g100)}
+.uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz .uzico{font-size:2rem;margin-bottom:.5rem}
+.uz .uzlbl{font-size:13.5px;font-weight:600;color:var(--mi)}
+.uz .uzfmt{font-size:11px;color:var(--mu);margin-top:.3rem}
+.file-list{margin-top:10px}
+.fitem{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--wh);border:1px solid var(--br);border-radius:9px;margin-bottom:6px}
+.ficon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--g100)}
+.fname{font-size:12.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.fsize{font-size:11px;color:var(--mu);flex-shrink:0}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin-top:.8rem}
+.prog-label{font-size:12px;color:var(--mu);margin-bottom:4px;display:flex;justify-content:space-between}
+.prog{height:8px;background:var(--br);border-radius:4px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--gr),#4AE89A);border-radius:4px;transition:width .3s;width:0}
+
+/* ── BUTTONS ── */
+.btn{padding:11px 22px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.btn-nv{background:var(--nv);color:var(--gdl)}.btn-nv:hover{background:var(--nvl)}
+.btn-gd{background:var(--gd);color:var(--nv)}.btn-gd:hover{background:var(--gdl)}
+.btn-gr{background:var(--gr);color:#fff}.btn-gr:hover{background:#158C57}
+.btn-rd{background:var(--rd);color:#fff}.btn-rd:hover{background:#C23A3A}
+.btn-bl{background:var(--bl);color:#fff}.btn-bl:hover{background:#1E6CC8}
+.btn-out{background:none;border:1.5px solid var(--br);color:var(--mi)}.btn-out:hover{border-color:var(--gd);color:var(--gd)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── STATUS BADGES ── */
+.sbdg{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.s-submitted{background:var(--blb);color:var(--bl)}
+.s-assigned{background:#FFF4E5;color:#C05C00}
+.s-under_review{background:var(--pub);color:var(--pu)}
+.s-reviewed{background:var(--grb);color:var(--gr)}
+.s-completed{background:var(--grb);color:#0A7A40}
+
+/* ── SUCCESS SCREEN ── */
+.success-box{background:linear-gradient(135deg,#0A2A0F,#0F3A18);border-radius:20px;padding:2.5rem;text-align:center;color:#fff}
+.success-box .ico{font-size:4rem;margin-bottom:1rem;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.success-box h2{font-family:'Cormorant Garamond',serif;font-size:2rem;color:#fff;margin-bottom:.4rem}
+.ref-box{background:rgba(255,255,255,.08);border:1.5px solid rgba(201,168,76,.4);border-radius:12px;padding:1.2rem 2rem;margin:1.2rem auto;display:inline-block}
+.ref-id{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--gdl);letter-spacing:2px}
+.ref-lbl{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.ac-box{background:rgba(201,168,76,.12);border:1.5px dashed rgba(201,168,76,.35);border-radius:12px;padding:1rem 1.5rem;margin:1rem 0;text-align:center}
+.ac-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;color:var(--gdl);letter-spacing:6px}
+.ac-lbl{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+
+/* ── TRACK SCREEN ── */
+.track-timeline{display:flex;flex-direction:column;gap:0}
+.tl-step{display:flex;gap:16px;position:relative;padding-bottom:1.5rem}
+.tl-step:last-child{padding-bottom:0}
+.tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:40px}
+.tl-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid var(--br);background:var(--bg);position:relative;z-index:1}
+.tl-circle.done{background:var(--gr);border-color:var(--gr);color:#fff}
+.tl-circle.active{background:var(--bl);border-color:var(--bl);color:#fff;animation:pulse2 2s ease-in-out infinite}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(43,127,224,.4)}50%{box-shadow:0 0 0 8px rgba(43,127,224,0)}}
+.tl-line{width:2px;flex:1;background:var(--br);margin-top:4px}
+.tl-line.done{background:var(--gr)}
+.tl-right{flex:1;padding-top:6px}
+.tl-title{font-size:14px;font-weight:700;color:var(--tx)}
+.tl-sub{font-size:12px;color:var(--mu);margin-top:2px}
+
+/* ── RESULT BOX ── */
+.result-box{background:linear-gradient(135deg,var(--grb),#fff);border:1.5px solid var(--gr);border-radius:14px;padding:1.5rem;margin-top:1rem}
+.result-nums{display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1rem}
+.r-num{text-align:center}
+.r-val{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--gr)}
+.r-lbl{font-size:11px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.feedback-row{font-size:13px;color:var(--mi);padding:6px 0;border-bottom:1px solid var(--br)}
+.feedback-row:last-child{border-bottom:none}
+.feedback-row strong{color:var(--tx)}
+
+/* ── ADMIN ── */
+.admin-lay{max-width:1100px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:200px 1fr;gap:1.5rem}
+.adm-sb{display:flex;flex-direction:column;gap:4px;position:sticky;top:76px;align-self:start}
+.adm-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;color:var(--mi);cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all .15s}
+.adm-btn:hover{background:var(--wh);color:var(--tx)}
+.adm-btn.act{background:var(--nv);color:var(--gdl);font-weight:600}
+.adm-btn .abadge{margin-left:auto;background:var(--rd);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;min-width:18px;text-align:center}
+.ssep{height:1px;background:var(--br);margin:6px 0}
+.adm-main{min-height:70vh}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-c{background:var(--wh);border:1px solid var(--br);border-radius:var(--r);padding:1.2rem;text-align:center}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700}
+.stat-l{font-size:11px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.tbl thead{background:var(--nv)}
+.tbl th{padding:10px 14px;color:var(--gdl);font-weight:600;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.tbl th:first-child{border-radius:9px 0 0 0}.tbl th:last-child{border-radius:0 9px 0 0}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--br);color:var(--mi);vertical-align:middle}
+.tbl tbody tr:hover td{background:var(--g100)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--mu)}
+.empty .ei{font-size:3rem;opacity:.35;margin-bottom:1rem}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--nv);color:var(--gdl);padding:13px 28px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:9999;display:none;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+.toast.on{display:inline-flex;align-items:center;gap:8px;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ── WALINK ── */
+.wa-btn{background:#25D366;color:#fff;border:none;padding:13px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s}
+.wa-btn:hover{background:#1EBA5A;transform:translateY(-2px);box-shadow:0 6px 20px rgba(37,211,102,.35)}
+.wa-btn svg{width:18px;height:18px;fill:#fff;flex-shrink:0}
+
+/* ── SEARCH ── */
+.search-bar{position:relative;margin-bottom:1rem}
+.search-bar input{padding-left:40px}
+.search-bar .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .fr2,.fr3,.stats-row{grid-template-columns:1fr}
+  .admin-lay{grid-template-columns:1fr}
+  .adm-sb{flex-direction:row;overflow-x:auto;position:static;padding-bottom:8px}
+  .adm-btn{white-space:nowrap;padding:8px 12px;font-size:12px}
+  .hero{padding:2.5rem 1.2rem}
+  .wrap,.wrap-wide{padding:1.2rem 1rem}
+  .card{padding:1.3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav class="nav">
+  <div class="ni">
+    <div class="logo" onclick="goHome()">
+      <div class="lgbdg">NK</div>
+      <div class="lgname">NK Academy<small>Answer Paper Review</small></div>
+    </div>
+    <div class="ham" id="hamBtn" onclick="togMenu()"><span></span><span></span><span></span></div>
+    <div class="nav-links" id="navLinks">
+      <a onclick="show('submitScreen')">📝 Submit Paper</a>
+      <a onclick="show('trackScreen')">🔍 Track Paper</a>
+      <a id="adminNavBtn" onclick="show('adminLoginScreen')">🔒 Admin Login</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════
+     SCREEN 1: HOME
+══════════════════════════════ -->
+<div id="homeScreen" class="screen active">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-tag">✦ No Login Required for Students</div>
+      <h1>Submit Your Answer Paper<br/>for <em>Expert Review</em></h1>
+      <p>Upload your answer sheet in minutes. Our expert faculty will review it and provide detailed marks, feedback, and personalized suggestions — within 3 working days.</p>
+      <div class="hero-btns">
+        <button class="hbtn hbtn-gold" onclick="show('submitScreen')">📝 Submit Answer Paper</button>
+        <button class="hbtn hbtn-outline" onclick="show('trackScreen')">🔍 Track My Submission</button>
+      </div>
+    </div>
+  </div>
+  <div class="info-strip">
+    <div class="info-inner">
+      <span class="info-item"><span class="info-dot"></span>No registration required</span>
+      <span class="info-item"><span class="info-dot"></span>Results within 3 working days</span>
+      <span class="info-item"><span class="info-dot"></span>WhatsApp updates at every step</span>
+      <span class="info-item"><span class="info-dot"></span>Expert CA & PG faculty review</span>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:1.5rem">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem">
+      <div class="card card-sm" style="border-top:4px solid var(--gd)">
+        <div style="font-size:2rem;margin-bottom:.8rem">📝</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:.4rem;color:var(--nv)">Submit Answer Paper</div>
+        <div style="font-size:13px;color:var(--mu)">Upload your question paper, answer sheet and answer key. Get a unique reference number instantly.</div>
+        <button class="btn btn-gd" style="margin-top:1rem" onclick="show('submitScreen')">Submit Now →</button>
+      </div>
+      <div class="card card-sm" style="border-top:4px solid var(--bl)">
+        <div style="font-size:2rem;margin-bottom:.8rem">🔍</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:.4rem;color:var(--nv)">Track Your Submission</div>
+        <div style="font-size:13px;color:var(--mu)">Enter your reference number and mobile number to check the current status of your paper review.</div>
+        <button class="btn btn-bl" style="margin-top:1rem" onclick="show('trackScreen')">Track Now →</button>
+      </div>
+      <div class="card card-sm" style="border-top:4px solid var(--gr)">
+        <div style="font-size:2rem;margin-bottom:.8rem">🏆</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:.4rem;color:var(--nv)">Get Expert Feedback</div>
+        <div style="font-size:13px;color:var(--mu)">Receive detailed marks, grade, subject-wise feedback, strengths, weak areas and improvement tips.</div>
+        <button class="btn btn-gr" style="margin-top:1rem" onclick="show('submitScreen')">Get Started →</button>
+      </div>
+    </div>
+  </div>
+  <div class="info-strip" style="margin-top:2rem;border-top:1px solid rgba(255,255,255,.06)">
+    <div class="info-inner" style="font-size:12px;color:rgba(255,255,255,.4)">
+      © 2025 NK Academy, Mayiladuthurai | 6369603854 | 9500679009 | 11AM–6PM Office Hours
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 2: SUBMIT PAPER
+══════════════════════════════ -->
+<div id="submitScreen" class="screen">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;margin-top:.5rem">
+      <button class="btn btn-out btn-sm" onclick="goHome()">← Back</button>
+      <span style="font-size:13px;color:var(--mu)">Home / Submit Paper</span>
+    </div>
+    <div class="card">
+      <h2>Submit Answer Paper for Review</h2>
+      <div class="sub">Fill in your details and upload your papers. No login required — takes less than 3 minutes.</div>
+
+      <div class="fr2">
+        <div class="fg"><label>Student Name<span class="req">*</span></label><input class="fi" type="text" id="sName" placeholder="Your full name"/></div>
+        <div class="fg"><label>Mobile Number<span class="req">*</span></label><input class="fi" type="tel" id="sPhone" placeholder="9876543210" maxlength="10"/></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label>Email Address <span style="color:var(--mu);font-size:10px">(optional)</span></label><input class="fi" type="email" id="sEmail" placeholder="your@email.com"/></div>
+        <div class="fg"><label>Board<span class="req">*</span></label>
+          <select class="fi" id="sBoard"><option value="">Select Board</option><option>Matriculation</option><option>CBSE</option><option>ICSE</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Standard / Class<span class="req">*</span></label>
+        <select class="fi" id="sStd"><option value="">Select Standard</option><option>9th</option><option>10th</option><option>11th</option><option>12th</option></select>
+      </div>
+      <div class="fg">
+        <label>Subject(s)<span class="req">*</span> <span style="color:var(--mu);font-size:10px">— tap all that apply</span></label>
+        <div class="chips" id="chipWrap"></div>
+      </div>
+
+      <!-- Upload: Question Paper -->
+      <div class="fg">
+        <label>Question Paper<span class="req">*</span></label>
+        <div class="uz" id="qpZone">
+          <input type="file" id="qpFile" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="previewF(this,'qpPrev','qpZone')"/>
+          <div class="uzico">📄</div>
+          <div class="uzlbl">Upload Question Paper</div>
+          <div class="uzfmt">PDF, JPG, PNG — tap to select or drag & drop</div>
+        </div>
+        <div class="file-list" id="qpPrev"></div>
+      </div>
+
+      <!-- Upload: Answer Sheet -->
+      <div class="fg">
+        <label>Answer Sheet<span class="req">*</span></label>
+        <div class="uz" id="asZone">
+          <input type="file" id="asFile" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="previewF(this,'asPrev','asZone')"/>
+          <div class="uzico">📝</div>
+          <div class="uzlbl">Upload Answer Sheet</div>
+          <div class="uzfmt">Multiple pages allowed — PDF or photos (max 25MB per file)</div>
+        </div>
+        <div class="file-list" id="asPrev"></div>
+      </div>
+
+      <!-- Upload: Answer Key -->
+      <div class="fg">
+        <label>Answer Key <span style="color:var(--mu);font-size:10px">(optional — helps faster review)</span></label>
+        <div class="uz" id="akZone">
+          <input type="file" id="akFile" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="previewF(this,'akPrev','akZone')"/>
+          <div class="uzico">🔑</div>
+          <div class="uzlbl">Upload Answer Key</div>
+          <div class="uzfmt">PDF, JPG, PNG</div>
+        </div>
+        <div class="file-list" id="akPrev"></div>
+      </div>
+
+      <div id="subProgWrap" style="display:none">
+        <div class="prog-wrap">
+          <div class="prog-label"><span id="progLabel">Uploading...</span><span id="progPct">0%</span></div>
+          <div class="prog"><div class="prog-bar" id="progBar"></div></div>
+        </div>
+      </div>
+      <div id="subErrMsg" style="display:none;background:var(--rdb);color:var(--rd);padding:10px 14px;border-radius:9px;font-size:13px;margin-top:.8rem"></div>
+      <button class="btn btn-gr btn-full" style="margin-top:1.2rem;font-size:15px;padding:15px" onclick="doSubmit()" id="subBtn">Submit for Review →</button>
+      <div style="text-align:center;margin-top:.8rem;font-size:12px;color:var(--mu)">Your papers are stored securely. Review completed within 3 working days.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 3: SUCCESS
+══════════════════════════════ -->
+<div id="successScreen" class="screen">
+  <div class="wrap">
+    <div class="success-box">
+      <div class="ico">🎉</div>
+      <h2>Submission Successful!</h2>
+      <p style="color:rgba(255,255,255,.65);margin:.5rem 0 1.2rem;font-size:14px">Your answer paper has been received. Save your Reference Number.</p>
+      <div class="ref-box">
+        <div class="ref-lbl">Your Submission Reference Number</div>
+        <div class="ref-id" id="showRefId">NKA---------</div>
+      </div>
+      <div class="ac-box">
+        <div class="ac-lbl">Your Secure Access Code</div>
+        <div class="ac-num" id="showAC">------</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:6px">Save this — you'll need it to track your submission</div>
+      </div>
+      <p style="color:rgba(255,255,255,.55);font-size:12.5px;margin-bottom:1.2rem">Tap below to send yourself a WhatsApp confirmation with your reference number and access code.</p>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+        <button class="wa-btn" id="waBtnStudent" onclick="sendStudentWA()">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Send Confirmation via WhatsApp
+        </button>
+        <button class="btn btn-out" onclick="show('trackScreen')" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)">🔍 Track My Submission</button>
+        <button class="btn btn-out" onclick="resetSubmit()" style="color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.1);font-size:12px">Submit Another Paper</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.2rem;text-align:center;padding:1.5rem">
+      <div style="font-size:13px;color:var(--mu);margin-bottom:1rem">Review completed within <strong style="color:var(--gr)">3 working days</strong>. We'll notify you on WhatsApp when ready.</div>
+      <div style="font-size:12.5px;color:var(--mu)">For any queries: <strong style="color:var(--nv)">6369603854</strong> | 9500679009 (Office hours: 11AM–6PM)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 4: TRACK PAPER
+══════════════════════════════ -->
+<div id="trackScreen" class="screen">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;margin-top:.5rem">
+      <button class="btn btn-out btn-sm" onclick="goHome()">← Back</button>
+      <span style="font-size:13px;color:var(--mu)">Home / Track Paper</span>
+    </div>
+    <div class="card">
+      <h2>Track Paper Review</h2>
+      <div class="sub">Enter your submission reference number and mobile number to check your paper's status.</div>
+      <div class="fr2">
+        <div class="fg"><label>Reference Number<span class="req">*</span></label><input class="fi" id="trRef" placeholder="e.g. NKA-20260730-0042" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/></div>
+        <div class="fg"><label>Mobile Number<span class="req">*</span></label><input class="fi" type="tel" id="trPhone" placeholder="9876543210" maxlength="10"/></div>
+      </div>
+      <button class="btn btn-nv btn-full" onclick="doTrack()" id="trBtn">Check Status →</button>
+    </div>
+    <div id="trackResult" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 5: ADMIN / REVIEWER LOGIN
+══════════════════════════════ -->
+<div id="adminLoginScreen" class="screen">
+  <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem">
+    <div style="background:var(--wh);border-radius:20px;padding:2.5rem;width:100%;max-width:400px;border:1px solid var(--br)">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <div class="lgbdg" style="margin:0 auto .8rem;width:48px;height:48px;font-size:20px">NK</div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--nv)">Admin / Reviewer Login</h2>
+        <p style="font-size:13px;color:var(--mu);margin-top:.3rem">Secure access for faculty and administrators</p>
+      </div>
+      <div id="alErr" style="display:none;background:var(--rdb);color:var(--rd);padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:1rem"></div>
+      <div class="fg"><label>Email</label><input class="fi" type="email" id="alEmail" placeholder="faculty@nkacademy.in" onkeydown="if(event.key==='Enter')doAdminLogin()"/></div>
+      <div class="fg"><label>Password</label><input class="fi" type="password" id="alPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doAdminLogin()"/></div>
+      <button class="btn btn-nv btn-full" onclick="doAdminLogin()" id="alBtn">Login →</button>
+      <div style="text-align:center;margin-top:1rem;font-size:12px;color:var(--mu)">Students do not need to login — <span style="color:var(--bl);cursor:pointer" onclick="show('submitScreen')">Submit Paper here</span></div>
+      <button class="btn btn-out btn-sm" style="margin-top:1rem;width:100%;justify-content:center" onclick="goHome()">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 6: ADMIN DASHBOARD
+══════════════════════════════ -->
+<div id="adminScreen" class="screen">
+  <div class="admin-lay">
+    <div class="adm-sb">
+      <div style="padding:10px 14px;margin-bottom:4px">
+        <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:1px">Admin Panel</div>
+        <div style="font-size:13px;font-weight:600;color:var(--tx);margin-top:2px" id="adminName">-</div>
+        <div style="font-size:11px;color:var(--mu)" id="adminRole">-</div>
+      </div>
+      <div class="ssep"></div>
+      <button class="adm-btn act" onclick="adNav('dashboard',this)">📊 Dashboard</button>
+      <button class="adm-btn" onclick="adNav('allsubs',this)">📋 All Submissions <span class="abadge" id="pendBadge" style="display:none">0</span></button>
+      <button class="adm-btn" onclick="adNav('reviewer',this)">✏️ Review Paper</button>
+      <button class="adm-btn" onclick="adNav('materials',this)">📚 Study Materials</button>
+      <div class="ssep"></div>
+      <button class="adm-btn" onclick="adNav('students',this)">👥 Students</button>
+      <button class="adm-btn" onclick="adNav('audit',this)">🔒 Audit Log</button>
+      <div class="ssep"></div>
+      <button class="adm-btn" style="color:var(--rd)" onclick="doAdminLogout()">↩ Logout</button>
+    </div>
+    <div class="adm-main" id="adMain"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// REPLACE THESE TWO VALUES WITH YOUR OWN!
+// ══════════════════════════════════════════
+const SURL = 'https://vhwnulkjlgpchmiiwxlb.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod251bGtqbGdwY2htaWl3eGxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NTc4NjMsImV4cCI6MjEwMTAzMzg2M30.msDw4wAWIPTWAEEIZcVqnRn9l7mZ-U4_6LlOfy9e3Q8';
+const WA   = '916369603854';
+
+const {createClient} = supabase;
+const sb = createClient(SURL, SKEY);
+let adminUser = null, adminProfile = null;
+let curRefId = '', curAC = '', curPhone = '', curName = '';
+let selSubjs = [];
+const SUBJS = ['Mathematics','Physics','Chemistry','Biology','Computer Science','Accountancy','Commerce','Economics','English'];
+
+// ── INIT ──
+window.onload = function(){
+  buildChips();
+  sb.auth.onAuthStateChange(async (_,sess) => {
+    if(sess?.user){
+      adminUser = sess.user;
+      const {data} = await sb.from('reviewer_profiles').select('*').eq('id',sess.user.id).single();
+      if(data){ adminProfile=data; if(document.getElementById('adminScreen').classList.contains('active')) showAdmin(); }
+    } else { adminUser=null; adminProfile=null; }
+  });
+};
+
+// ── NAV & SCREEN ──
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('act'));
+  document.getElementById('navLinks').classList.remove('open');
+  window.scrollTo(0,0);
+}
+function goHome(){ show('homeScreen'); }
+function togMenu(){ document.getElementById('navLinks').classList.toggle('open'); }
+
+// ── SUBJECT CHIPS ──
+function buildChips(){
+  document.getElementById('chipWrap').innerHTML = SUBJS.map(s=>`<span class="chip" onclick="togChip(this,'${s}')">${s}</span>`).join('');
+}
+function togChip(el,s){
+  el.classList.toggle('on');
+  selSubjs.includes(s) ? selSubjs=selSubjs.filter(x=>x!==s) : selSubjs.push(s);
+}
+
+// ── FILE PREVIEW ──
+function previewF(inp, prevId, zoneId){
+  const prev = document.getElementById(prevId);
+  prev.innerHTML = Array.from(inp.files).map(f=>{
+    const sz = f.size<1048576 ? (f.size/1024).toFixed(0)+' KB' : (f.size/1048576).toFixed(1)+' MB';
+    return `<div class="fitem"><div class="ficon">📄</div><div class="fname">${f.name}</div><div class="fsize">${sz}</div></div>`;
+  }).join('');
+}
+
+// ── GENERATE REFERENCE ID ──
+async function genRefId(){
+  const d = new Date();
+  const ds = d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  const {count} = await sb.from('submissions').select('*',{count:'exact',head:true}).like('id',`NKA-${ds}-%`);
+  const seq = String((count||0)+1).padStart(4,'0');
+  return `NKA-${ds}-${seq}`;
+}
+function genAC(){ return String(Math.floor(100000+Math.random()*899999)); }
+
+// ── UPLOAD FILES ──
+async function upFiles(fileList, bucket, prefix, onProg){
+  const results=[]; const files=Array.from(fileList);
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    if(f.size>25*1024*1024){toast(`Skipped (>25MB): ${f.name}`);continue;}
+    const path=`${prefix}/${Date.now()}_${i}_${f.name.replace(/[^\w.-]/g,'_')}`;
+    const {error}=await sb.storage.from(bucket).upload(path,f,{cacheControl:'3600',upsert:false});
+    if(error){toast(`Upload error: ${error.message}`);continue;}
+    const {data:u}=sb.storage.from(bucket).getPublicUrl(path);
+    results.push({file_name:f.name,file_path:path,file_url:u.publicUrl});
+    if(onProg) onProg((i+1)/files.length);
+  }
+  return results;
+}
+
+// ── PROGRESS ──
+function setProgress(pct, label){
+  document.getElementById('progBar').style.width=(pct*100)+'%';
+  document.getElementById('progPct').textContent=Math.round(pct*100)+'%';
+  document.getElementById('progLabel').textContent=label||'Uploading...';
+}
+
+// ═══════════════════════════════
+// STUDENT: SUBMIT
+// ═══════════════════════════════
+async function doSubmit(){
+  const name=fi('sName'),phone=fi('sPhone'),email=fi('sEmail'),board=fi('sBoard'),std=fi('sStd');
+  const qpF=document.getElementById('qpFile').files, asF=document.getElementById('asFile').files, akF=document.getElementById('akFile').files;
+  const errEl=document.getElementById('subErrMsg');
+  errEl.style.display='none';
+
+  if(!name){return showFErr('Please enter your name');}
+  if(!phone||phone.length<10){return showFErr('Please enter a valid 10-digit mobile number');}
+  if(!board){return showFErr('Please select your board');}
+  if(!std){return showFErr('Please select your standard / class');}
+  if(!selSubjs.length){return showFErr('Please select at least one subject');}
+  if(!qpF.length){return showFErr('Question paper upload is required');}
+  if(!asF.length){return showFErr('Answer sheet upload is required');}
+
+  const btn=document.getElementById('subBtn');
+  btn.disabled=true; btn.textContent='Submitting...';
+  document.getElementById('subProgWrap').style.display='block';
+
+  try{
+    const refId=await genRefId(), ac=genAC();
+    curRefId=refId; curAC=ac; curPhone=phone; curName=name;
+
+    setProgress(0,'Uploading question paper...');
+    const qpUrls=await upFiles(qpF,'submissions',`${refId}/question-paper`,p=>setProgress(p*0.33,'Uploading question paper...'));
+    setProgress(0.33,'Uploading answer sheet...');
+    const asUrls=await upFiles(asF,'submissions',`${refId}/answer-sheet`,p=>setProgress(0.33+p*0.33,'Uploading answer sheet...'));
+    setProgress(0.66,'Uploading answer key...');
+    const akUrls=akF.length?await upFiles(akF,'submissions',`${refId}/answer-key`,p=>setProgress(0.66+p*0.2,'Uploading answer key...')):[];
+    setProgress(0.9,'Saving submission...');
+
+    const {error:se}=await sb.from('submissions').insert({
+      id:refId, access_code:ac,
+      student_name:name, student_phone:phone, student_email:email||null,
+      standard:std, board, subjects:selSubjs, status:'submitted'
+    });
+    if(se) throw se;
+
+    const fileRows=[
+      ...qpUrls.map(f=>({submission_id:refId,file_type:'question_paper',...f})),
+      ...asUrls.map(f=>({submission_id:refId,file_type:'answer_sheet',...f})),
+      ...akUrls.map(f=>({submission_id:refId,file_type:'answer_key',...f})),
+    ];
+    if(fileRows.length) await sb.from('submission_files').insert(fileRows);
+    await sb.from('audit_log').insert({action:'SUBMITTED',submission_id:refId,details:`${name} submitted ${selSubjs.join(', ')}`,by_name:name});
+    setProgress(1,'Done!');
+
+    document.getElementById('showRefId').textContent=refId;
+    document.getElementById('showAC').textContent=ac;
+    show('successScreen');
+  }catch(e){
+    showFErr('Submission failed: '+e.message);
+    btn.disabled=false; btn.textContent='Submit for Review →';
+    document.getElementById('subProgWrap').style.display='none';
+  }
+}
+function fi(id){return document.getElementById(id)?.value?.trim()||'';}
+function showFErr(msg){const e=document.getElementById('subErrMsg');e.textContent=msg;e.style.display='block';document.getElementById('subBtn').disabled=false;document.getElementById('subBtn').textContent='Submit for Review →';document.getElementById('subProgWrap').style.display='none';}
+
+function sendStudentWA(){
+  const dt=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const msg=`✅ *Submission Confirmed — NK Academy*\n\nHi ${curName}!\n\nYour answer paper has been submitted successfully.\n\n📋 *Reference Number:* ${curRefId}\n🔐 *Access Code:* ${curAC}\n📅 Date & Time: ${dt}\n\n⏱ Your paper will be reviewed within *3 working days*.\n\nTo track your review status:\n1. Visit www.nkacademyedu.com/portal.html\n2. Click "Track Paper"\n3. Enter your Reference Number + Mobile\n\nFor support: 6369603854 | 9500679009\n(Office hours: 11AM – 6PM)\n\nThank you for choosing NK Academy!`;
+  const studentPhone='91'+curPhone;
+  window.open(`https://wa.me/${studentPhone}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function resetSubmit(){
+  document.getElementById('sName').value='';
+  document.getElementById('sPhone').value='';
+  document.getElementById('sEmail').value='';
+  document.getElementById('sBoard').value='';
+  document.getElementById('sStd').value='';
+  selSubjs=[];
+  ['qpFile','asFile','akFile'].forEach(id=>document.getElementById(id).value='');
+  ['qpPrev','asPrev','akPrev'].forEach(id=>document.getElementById(id).innerHTML='');
+  ['qpZone','asZone','akZone'].forEach(id=>document.getElementById(id).classList.remove('drag'));
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('subProgWrap').style.display='none';
+  document.getElementById('subErrMsg').style.display='none';
+  document.getElementById('subBtn').disabled=false;
+  document.getElementById('subBtn').textContent='Submit for Review →';
+  show('submitScreen');
+}
+
+// ═══════════════════════════════
+// STUDENT: TRACK
+// ═══════════════════════════════
+async function doTrack(){
+  const ref=fi('trRef').toUpperCase(), phone=fi('trPhone');
+  if(!ref||!phone){return toast('Please enter your Reference Number and Mobile Number');}
+  const btn=document.getElementById('trBtn');
+  btn.disabled=true; btn.textContent='Searching...';
+  const {data:sub, error}=await sb.from('submissions').select('*').eq('id',ref).eq('student_phone',phone).single();
+  btn.disabled=false; btn.textContent='Check Status →';
+  if(error||!sub){
+    document.getElementById('trackResult').style.display='none';
+    toast('No submission found. Please check your Reference Number and Mobile Number.');
+    return;
+  }
+  const {data:files}=await sb.from('submission_files').select('*').eq('submission_id',ref);
+  renderTrackResult(sub, files||[]);
+}
+
+function renderTrackResult(s, files){
+  const statuses=['submitted','assigned','under_review','reviewed','completed'];
+  const statusLabels={'submitted':'Submission Received','assigned':'Paper Assigned to Reviewer','under_review':'Under Review','reviewed':'Review Completed','completed':'Feedback Delivered'};
+  const statusIcons={submitted:'📥',assigned:'👨‍🏫',under_review:'🔍',reviewed:'✅',completed:'🏆'};
+  const curIdx=statuses.indexOf(s.status);
+
+  let tlHtml='';
+  statuses.forEach((st,i)=>{
+    const done=i<curIdx, active=i===curIdx;
+    const clas=done?'done':active?'active':'';
+    tlHtml+=`<div class="tl-step">
+      <div class="tl-left">
+        <div class="tl-circle ${clas}">${done?'✓':active?statusIcons[st]:'○'}</div>
+        ${i<statuses.length-1?`<div class="tl-line ${done?'done':''}"></div>`:''}
+      </div>
+      <div class="tl-right">
+        <div class="tl-title" style="color:${active?'var(--bl)':done?'var(--gr)':'var(--mu)'}">${statusLabels[st]}</div>
+        <div class="tl-sub">${active?'Current status':done?'Completed':''}</div>
+      </div>
+    </div>`;
+  });
+
+  const corrFiles=files.filter(f=>f.file_type==='corrected');
+  const matFiles=files.filter(f=>f.file_type==='study_material');
+  const qpFiles=files.filter(f=>f.file_type==='question_paper');
+  const asFiles=files.filter(f=>f.file_type==='answer_sheet');
+  const isDone=s.status==='reviewed'||s.status==='completed';
+
+  let resultHtml='';
+  if(isDone){
+    resultHtml=`<div class="result-box">
+      <div style="font-size:14px;font-weight:700;color:var(--nv);margin-bottom:1rem">📊 Review Results</div>
+      <div class="result-nums">
+        <div class="r-num"><div class="r-val">${s.marks||'-'}/${s.total_marks||'-'}</div><div class="r-lbl">Marks</div></div>
+        <div class="r-num"><div class="r-val" style="font-size:1.5rem">${s.grade||'-'}</div><div class="r-lbl">Grade</div></div>
+      </div>
+      ${s.remarks?`<div class="feedback-row"><strong>Remarks:</strong> ${s.remarks}</div>`:''}
+      ${s.suggestions?`<div class="feedback-row"><strong>Suggestions:</strong> ${s.suggestions}</div>`:''}
+      ${s.strengths?`<div class="feedback-row" style="color:var(--gr)"><strong>✦ Strengths:</strong> ${s.strengths}</div>`:''}
+      ${s.weak_areas?`<div class="feedback-row" style="color:var(--rd)"><strong>⚡ Work On:</strong> ${s.weak_areas}</div>`:''}
+      ${corrFiles.length?`<div style="margin-top:1rem"><strong style="font-size:13px">Download Your Files:</strong><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+        ${qpFiles.map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-out btn-sm">📄 Question Paper ${qpFiles.length>1?i+1:''}</a>`).join('')}
+        ${asFiles.map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-out btn-sm">📝 Answer Sheet ${asFiles.length>1?i+1:''}</a>`).join('')}
+        ${corrFiles.map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-gr btn-sm">✅ Corrected Paper ${corrFiles.length>1?i+1:''}</a>`).join('')}
+        ${matFiles.map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-nv btn-sm">📚 Study Material ${matFiles.length>1?i+1:''}</a>`).join('')}
+        <button class="btn btn-gd btn-sm" onclick="dlZip('${s.id}')">⬇ Download All (ZIP)</button>
+      </div></div>`:''}
+    </div>`;
+  }
+
+  const waNotify=`*Paper Review Ready — NK Academy*\n\nHi ${s.student_name}!\n\nYour answer paper review is complete.\n\n📋 Reference: ${s.id}\n📊 Marks: ${s.marks}/${s.total_marks}\n🎓 Grade: ${s.grade}\n\nTrack and download your papers:\nwww.nkacademyedu.com/portal.html\n\nFor support: 6369603854`;
+
+  document.getElementById('trackResult').style.display='block';
+  document.getElementById('trackResult').innerHTML=`
+    <div class="card" style="margin-top:1rem">
+      <div class="ch">
+        <div>
+          <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Submission Details</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--nv)">${s.id}</div>
+        </div>
+        <span class="sbdg s-${s.status}">${statusLabels[s.status]||s.status}</span>
+      </div>
+      <div class="fr3" style="margin-bottom:1.2rem;font-size:13px;color:var(--mi)">
+        <div><strong>Student:</strong> ${s.student_name}</div>
+        <div><strong>Standard:</strong> ${s.standard} (${s.board})</div>
+        <div><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--mu);margin-bottom:1.5rem">Submitted: ${fmtDate(s.created_at)}${s.reviewed_at?` | Reviewed: ${fmtDate(s.reviewed_at)}`:''}</div>
+      <div class="track-timeline">${tlHtml}</div>
+      ${resultHtml}
+      ${isDone && s.student_phone?`<div style="margin-top:1rem;text-align:center">
+        <button class="wa-btn btn-sm" onclick="window.open('https://wa.me/91${s.student_phone}?text=${encodeURIComponent(waNotify)}','_blank')">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Resend WhatsApp Notification to Student
+        </button>
+      </div>`:''}
+    </div>`;
+}
+
+async function dlZip(sid){
+  toast('Preparing ZIP file...');
+  const {data:files}=await sb.from('submission_files').select('*').eq('submission_id',sid);
+  if(!files?.length) return toast('No files to download');
+  const zip=new JSZip();
+  for(const f of files){
+    try{const r=await fetch(f.file_url);const b=await r.blob();zip.folder(f.file_type.replace(/_/g,' ')).file(f.file_name,b);}
+    catch(e){console.log(e);}
+  }
+  const c=await zip.generateAsync({type:'blob'});
+  saveAs(c,`${sid}_NK_Academy.zip`);
+  toast('ZIP downloaded!');
+}
+
+// ═══════════════════════════════
+// ADMIN AUTH
+// ═══════════════════════════════
+async function doAdminLogin(){
+  const email=fi('alEmail'), pass=fi('alPass');
+  if(!email||!pass){document.getElementById('alErr').textContent='Please enter email and password';document.getElementById('alErr').style.display='block';return;}
+  const btn=document.getElementById('alBtn'); btn.disabled=true; btn.textContent='Logging in...';
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){document.getElementById('alErr').textContent=error.message;document.getElementById('alErr').style.display='block';btn.disabled=false;btn.textContent='Login →';return;}
+  const {data:prof}=await sb.from('reviewer_profiles').select('*').eq('id',data.user.id).single();
+  if(!prof){document.getElementById('alErr').textContent='Profile not found. Contact admin.';document.getElementById('alErr').style.display='block';btn.disabled=false;btn.textContent='Login →';return;}
+  adminUser=data.user; adminProfile=prof;
+  btn.disabled=false; btn.textContent='Login →';
+  showAdmin();
+}
+async function doAdminLogout(){await sb.auth.signOut(); adminUser=null; adminProfile=null; goHome();}
+function showAdmin(){
+  document.getElementById('adminName').textContent=adminProfile.name;
+  document.getElementById('adminRole').textContent=adminProfile.role.toUpperCase();
+  show('adminScreen');
+  adNav('dashboard', document.querySelector('.adm-btn'));
+}
+
+// ═══════════════════════════════
+// ADMIN: NAVIGATION
+// ═══════════════════════════════
+function adNav(page, el){
+  document.querySelectorAll('.adm-btn').forEach(b=>b.classList.remove('act'));
+  el?.classList?.add('act');
+  const m=document.getElementById('adMain');
+  const pages={dashboard:adDashboard,allsubs:adAllSubs,reviewer:adReviewer,materials:adMaterials,students:adStudents,audit:adAudit};
+  if(pages[page]) pages[page](m);
+}
+
+// ═══════════════════════════════
+// ADMIN: DASHBOARD
+// ═══════════════════════════════
+async function adDashboard(el){
+  el.innerHTML=`
+  <div class="stats-row">
+    <div class="stat-c"><div class="stat-n" style="color:var(--bl)" id="dT">-</div><div class="stat-l">Total</div></div>
+    <div class="stat-c"><div class="stat-n" style="color:#C05C00" id="dS">-</div><div class="stat-l">Awaiting Assignment</div></div>
+    <div class="stat-c"><div class="stat-n" style="color:var(--pu)" id="dA">-</div><div class="stat-l">Under Review</div></div>
+    <div class="stat-c"><div class="stat-n" style="color:var(--gr)" id="dR">-</div><div class="stat-l">Reviewed</div></div>
+  </div>
+  <div class="card"><div class="ch"><span style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--nv)">Recent Submissions</span><button class="btn btn-out btn-sm" onclick="adNav('allsubs',this)">View All</button></div>
+  <div id="dRecent"><div class="empty"><div class="ei">📋</div><p>Loading...</p></div></div></div>`;
+  const {data:all,count}=await sb.from('submissions').select('*',{count:'exact'}).order('created_at',{ascending:false});
+  const t=all?.length||0, s=(all||[]).filter(x=>x.status==='submitted').length, a=(all||[]).filter(x=>x.status==='assigned'||x.status==='under_review').length, r=(all||[]).filter(x=>x.status==='reviewed'||x.status==='completed').length;
+  document.getElementById('dT').textContent=t;
+  document.getElementById('dS').textContent=s;
+  document.getElementById('dA').textContent=a;
+  document.getElementById('dR').textContent=r;
+  if(s>0){const b=document.getElementById('pendBadge');if(b){b.textContent=s;b.style.display='inline';}}
+  if(!all?.length){document.getElementById('dRecent').innerHTML='<div class="empty"><div class="ei">📋</div><p>No submissions yet</p></div>';return;}
+  let html='<table class="tbl"><thead><tr><th>Reference ID</th><th>Student</th><th>Mobile</th><th>Subjects</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+  (all||[]).slice(0,10).forEach(s=>{
+    html+=`<tr><td style="font-weight:700;font-family:'Cormorant Garamond',serif">${s.id}</td><td><strong>${s.student_name}</strong></td><td>${s.student_phone}</td><td>${(s.subjects||[]).join(', ')}</td><td>${fmtDate(s.created_at)}</td>
+    <td><span class="sbdg s-${s.status}">${s.status.replace(/_/g,' ').toUpperCase()}</span></td>
+    <td><button class="btn btn-nv btn-sm" onclick="adManage('${s.id}')">Manage</button></td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('dRecent').innerHTML=html;
+}
+
+// ═══════════════════════════════
+// ADMIN: ALL SUBMISSIONS
+// ═══════════════════════════════
+async function adAllSubs(el){
+  el.innerHTML=`
+  <div class="card">
+    <div class="ch"><span style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--nv)">All Submissions</span></div>
+    <div class="search-bar fg"><span class="si">🔍</span><input class="fi" id="srchInp" placeholder="Search by reference ID, student name or mobile..." oninput="filterTable(this.value)"/></div>
+    <div id="asList"><div class="empty"><div class="ei">📋</div><p>Loading...</p></div></div>
+  </div>`;
+  const {data:all}=await sb.from('submissions').select('*').order('created_at',{ascending:false});
+  window._allSubs=all||[];
+  renderSubTable(all||[]);
+}
+function filterTable(q){
+  const q2=q.toLowerCase();
+  const filtered=(window._allSubs||[]).filter(s=>s.id.toLowerCase().includes(q2)||s.student_name.toLowerCase().includes(q2)||s.student_phone.includes(q2));
+  renderSubTable(filtered);
+}
+function renderSubTable(arr){
+  if(!arr.length){document.getElementById('asList').innerHTML='<div class="empty"><div class="ei">📋</div><p>No submissions found</p></div>';return;}
+  let html='<table class="tbl"><thead><tr><th>Reference ID</th><th>Student</th><th>Mobile</th><th>Subjects</th><th>Standard</th><th>Date</th><th>Status</th><th>Reviewer</th><th>Action</th></tr></thead><tbody>';
+  arr.forEach(s=>{
+    html+=`<tr><td style="font-weight:700;font-family:'Cormorant Garamond',serif;white-space:nowrap">${s.id}</td><td><strong>${s.student_name}</strong></td><td>${s.student_phone}</td><td>${(s.subjects||[]).join(', ')}</td><td>${s.standard} ${s.board}</td><td style="white-space:nowrap">${fmtDate(s.created_at)}</td>
+    <td><span class="sbdg s-${s.status}">${s.status.replace(/_/g,' ').toUpperCase()}</span></td>
+    <td>${s.reviewer_name||'<span style="color:var(--mu)">Unassigned</span>'}</td>
+    <td><button class="btn btn-nv btn-sm" onclick="adManage('${s.id}')">Manage</button></td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('asList').innerHTML=html;
+}
+
+// ═══════════════════════════════
+// ADMIN: MANAGE SINGLE SUBMISSION
+// ═══════════════════════════════
+async function adManage(sid){
+  const {data:s}=await sb.from('submissions').select('*').eq('id',sid).single();
+  const {data:files}=await sb.from('submission_files').select('*').eq('submission_id',sid);
+  const {data:revs}=await sb.from('reviewer_profiles').select('*');
+  const byType=(t)=>(files||[]).filter(f=>f.file_type===t).map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-out btn-sm" style="margin:3px">File ${i+1}</a>`).join('');
+  const revOpts=(revs||[]).map(r=>`<option value="${r.id}|${r.name}|${r.phone||''}">${r.name}</option>`).join('');
+  const isDone=s.status==='reviewed'||s.status==='completed';
+  const waStudent=`🏆 *Review Completed — NK Academy*\n\nHi ${s.student_name}!\n\nYour paper has been reviewed.\n\n📋 Reference: ${s.id}\n📊 Marks: ${s.marks||'-'}/${s.total_marks||'-'} | Grade: ${s.grade||'-'}\n\n${s.remarks?`💬 ${s.remarks}\n`:''}\nTrack and download: www.nkacademyedu.com/portal.html\n\nFor support: 6369603854`;
+
+  const el=document.getElementById('adMain');
+  el.innerHTML=`
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+    <button class="btn btn-out btn-sm" onclick="adNav('allsubs',document.querySelectorAll('.adm-btn')[1])">← Back</button>
+    <span style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--nv)">${sid}</span>
+    <span class="sbdg s-${s.status}">${s.status.replace(/_/g,' ').toUpperCase()}</span>
+  </div>
+  <div class="card">
+    <div class="fr3" style="font-size:13px;margin-bottom:1rem;gap:16px">
+      <div><div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Student</div><strong>${s.student_name}</strong></div>
+      <div><div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Mobile</div>${s.student_phone}</div>
+      <div><div style="font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Standard</div>${s.standard} (${s.board})</div>
+    </div>
+    <div style="font-size:13px;color:var(--mi);margin-bottom:1rem"><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</div>
+    <div class="ac-box" style="background:var(--pub);border-color:var(--pu);border-style:dashed;padding:12px 16px;text-align:left">
+      <div style="font-size:11px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Reviewer Access Code</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--pu);letter-spacing:5px">${s.access_code}</div>
+    </div>
+    <div style="margin:1rem 0;line-height:2.4;font-size:13px">
+      <strong>Question Paper:</strong> ${byType('question_paper')||'<span style="color:var(--mu)">None</span>'}<br/>
+      <strong>Answer Sheet:</strong> ${byType('answer_sheet')||'<span style="color:var(--mu)">None</span>'}<br/>
+      <strong>Answer Key:</strong> ${byType('answer_key')||'<span style="color:var(--mu)">Not provided</span>'}
+      ${isDone?`<br/><strong>Corrected Paper:</strong> ${byType('corrected')||'<span style="color:var(--mu)">Not uploaded yet</span>'}`:''}
+    </div>
+    ${!isDone?`
+    <div style="border-top:1px solid var(--br);padding-top:1.2rem">
+      <div style="font-size:14px;font-weight:700;margin-bottom:.8rem">Assign to Reviewer</div>
+      <div class="fg"><select class="fi" id="revSel"><option value="">Select reviewer...</option>${revOpts}</select></div>
+      <button class="btn btn-bl" onclick="assignRev('${sid}')">Assign & Notify Reviewer via WhatsApp</button>
+    </div>`:''}
+    ${isDone?`
+    <div style="border-top:1px solid var(--br);padding-top:1.2rem;margin-top:1rem">
+      <div style="background:var(--grb);padding:1.2rem;border-radius:10px;margin-bottom:1rem">
+        <div style="font-size:14px;font-weight:700;color:var(--nv);margin-bottom:.8rem">Review Results</div>
+        <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:.8rem">
+          <div><div style="font-size:11px;color:var(--mu)">Marks</div><strong style="font-size:1.3rem;color:var(--gr)">${s.marks}/${s.total_marks}</strong></div>
+          <div><div style="font-size:11px;color:var(--mu)">Grade</div><strong style="font-size:1.3rem">${s.grade}</strong></div>
+        </div>
+        ${s.remarks?`<div style="font-size:13px;margin-bottom:4px"><strong>Remarks:</strong> ${s.remarks}</div>`:''}
+        ${s.suggestions?`<div style="font-size:13px;margin-bottom:4px"><strong>Suggestions:</strong> ${s.suggestions}</div>`:''}
+      </div>
+      ${s.status==='reviewed'?`<button class="btn btn-gr" onclick="markDone('${sid}')">Mark Completed & Notify Student via WhatsApp</button>`:''}
+      <button class="wa-btn" style="margin-left:.8rem" onclick="window.open('https://wa.me/91${s.student_phone}?text=${encodeURIComponent(waStudent)}','_blank')">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Resend WhatsApp
+      </button>
+    </div>`:''}
+  </div>`;
+}
+
+async function assignRev(sid){
+  const sel=document.getElementById('revSel')?.value;
+  if(!sel) return toast('Please select a reviewer');
+  const [uid,name,phone]=sel.split('|');
+  const {data:s}=await sb.from('submissions').select('*').eq('id',sid).single();
+  await sb.from('submissions').update({status:'assigned',reviewer_uid:uid,reviewer_name:name,assigned_at:new Date().toISOString()}).eq('id',sid);
+  await sb.from('audit_log').insert({action:'ASSIGNED',submission_id:sid,details:`Assigned to ${name}`,by_name:adminProfile.name});
+  const rP=(phone||'').startsWith('91')?phone:'91'+(phone||'');
+  const msg=`📋 *Paper Assigned — NK Academy*\n\nReviewer: ${name}\n\n👤 Student: ${s.student_name}\n📚 Subjects: ${(s.subjects||[]).join(', ')}\n🏫 Standard: ${s.standard} (${s.board})\n📋 Reference ID: *${sid}*\n🔐 Access Code: *${s.access_code}*\n📅 Submitted: ${fmtDate(s.created_at)}\n\nLogin to portal to review:\nwww.nkacademyedu.com/portal.html\n👉 Admin Login → Reviewer Login\n\nNK Academy | 6369603854`;
+  toast('Reviewer assigned!');
+  window.open(`https://wa.me/${rP}?text=${encodeURIComponent(msg)}`,'_blank');
+  adManage(sid);
+}
+
+async function markDone(sid){
+  const {data:s}=await sb.from('submissions').select('*').eq('id',sid).single();
+  await sb.from('submissions').update({status:'completed',notified_at:new Date().toISOString()}).eq('id',sid);
+  await sb.from('audit_log').insert({action:'COMPLETED',submission_id:sid,details:'Marked completed by admin',by_name:adminProfile.name});
+  const sP='91'+(s.student_phone||'');
+  const msg=`🏆 *Review Ready — NK Academy*\n\nHi ${s.student_name}!\n\nYour answer paper review is complete!\n\n📋 Reference: ${sid}\n📊 Marks: ${s.marks}/${s.total_marks}\n🎓 Grade: ${s.grade}\n\n${s.remarks?`💬 ${s.remarks}\n`:''}\nTo download your reviewed paper:\n🌐 www.nkacademyedu.com/portal.html\n→ Click "Track Paper"\n→ Enter your Reference Number + Mobile\n\nFor support: 6369603854\nNK Academy, Mayiladuthurai`;
+  toast('Marked completed!');
+  window.open(`https://wa.me/${sP}?text=${encodeURIComponent(msg)}`,'_blank');
+  adNav('allsubs',document.querySelectorAll('.adm-btn')[1]);
+}
+
+// ═══════════════════════════════
+// REVIEWER INTERFACE
+// ═══════════════════════════════
+async function adReviewer(el){
+  el.innerHTML=`
+  <div class="card">
+    <h2>Review Answer Paper</h2>
+    <div class="sub">Enter the Submission Reference Number and your Access Code to access and review the paper.</div>
+    <div class="fr2">
+      <div class="fg"><label>Submission Reference Number</label><input class="fi" id="rvRef" placeholder="NKA-20260730-0042" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/></div>
+      <div class="fg"><label>Access Code</label><input class="fi" type="text" id="rvAC" placeholder="6-digit code" maxlength="6" style="letter-spacing:4px;text-align:center"/></div>
+    </div>
+    <button class="btn btn-nv" onclick="loadReview()" id="rvLoadBtn">Load Paper →</button>
+  </div>
+  <div id="rvContent"></div>`;
+}
+
+async function loadReview(){
+  const ref=fi('rvRef').toUpperCase(), ac=fi('rvAC');
+  if(!ref||!ac) return toast('Please enter Reference Number and Access Code');
+  const btn=document.getElementById('rvLoadBtn'); btn.disabled=true; btn.textContent='Loading...';
+  const {data:s,error}=await sb.from('submissions').select('*').eq('id',ref).single();
+  btn.disabled=false; btn.textContent='Load Paper →';
+  if(error||!s) return toast('Submission not found. Check the reference number.');
+  if(s.access_code!==ac) return toast('Incorrect access code. Please try again.');
+  await sb.from('audit_log').insert({action:'FOLDER_ACCESSED',submission_id:ref,details:`${adminProfile.name} accessed folder`,by_name:adminProfile.name});
+  const {data:files}=await sb.from('submission_files').select('*').eq('submission_id',ref);
+  renderReviewForm(s,files||[]);
+}
+
+function renderReviewForm(s, files){
+  const byType=(t)=>files.filter(f=>f.file_type===t).map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-out btn-sm" style="margin:3px">📄 View File ${i+1}</a>`).join('');
+  const isDone=s.status==='reviewed'||s.status==='completed';
+  document.getElementById('rvContent').innerHTML=`
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap">
+      <span style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--nv)">${s.id}</span>
+      <span class="sbdg s-${s.status}">${s.status.replace(/_/g,' ').toUpperCase()}</span>
+    </div>
+    <div class="fr3" style="font-size:13px;color:var(--mi);margin-bottom:1rem">
+      <div><strong>Student:</strong> ${s.student_name}</div>
+      <div><strong>Mobile:</strong> ${s.student_phone}</div>
+      <div><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</div>
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:1rem;margin-bottom:1.2rem;font-size:13px;line-height:2.5">
+      <strong>Question Paper:</strong> ${byType('question_paper')||'None'}<br/>
+      <strong>Answer Sheet:</strong> ${byType('answer_sheet')||'None'}<br/>
+      <strong>Answer Key:</strong> ${byType('answer_key')||'Not provided'}
+    </div>
+    ${isDone?`<div style="background:var(--grb);padding:1.2rem;border-radius:10px;margin-bottom:1rem">
+      <strong>✅ Already Reviewed</strong> — Marks: ${s.marks}/${s.total_marks} | Grade: ${s.grade}
+      <div style="font-size:13px;margin-top:.5rem;color:var(--mi)">${s.remarks||''}</div>
+    </div>`:`
+    <div style="border-top:1px solid var(--br);padding-top:1.2rem">
+      <div style="font-size:15px;font-weight:700;margin-bottom:1rem;color:var(--nv)">📝 Submit Your Review</div>
+      <div class="fr2">
+        <div class="fg"><label>Marks Obtained <span class="req">*</span></label><input class="fi" type="number" id="rvM" placeholder="e.g. 78"/></div>
+        <div class="fg"><label>Total Marks</label><input class="fi" type="number" id="rvT" value="100"/></div>
+      </div>
+      <div class="fg"><label>Grade</label>
+        <select class="fi" id="rvG"><option>A+</option><option>A</option><option>B+</option><option>B</option><option>C</option><option>Needs Improvement</option></select>
+      </div>
+      <div class="fg"><label>Remarks <span class="req">*</span></label><textarea class="fi ta" id="rvR" placeholder="Overall performance feedback..."></textarea></div>
+      <div class="fg"><label>Suggestions for Improvement</label><textarea class="fi ta" id="rvSug" placeholder="What should the student focus on..."></textarea></div>
+      <div class="fg"><label>Strengths</label><input class="fi" id="rvStr" placeholder="e.g. Strong in derivations, good conceptual understanding"/></div>
+      <div class="fg"><label>Weak Areas to Improve</label><input class="fi" id="rvWk" placeholder="e.g. Numerical problems, diagram labeling"/></div>
+      <div class="fg"><label>Upload Corrected / Annotated Paper <span class="req">*</span></label>
+        <div class="uz"><input type="file" id="rvFile" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="previewF(this,'rvFilePrev','rvZone')"/>
+          <div class="uzico">📤</div><div class="uzlbl">Upload your corrected version</div><div class="uzfmt">PDF or images — multiple files allowed</div></div>
+        <div class="file-list" id="rvFilePrev"></div>
+      </div>
+      <div class="fg"><label>Upload Study Materials / Notes (optional)</label>
+        <div class="uz"><input type="file" id="rvMat" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="previewF(this,'rvMatPrev','rvMatZone')"/>
+          <div class="uzico">📚</div><div class="uzlbl">Additional resources for the student</div></div>
+        <div class="file-list" id="rvMatPrev"></div>
+      </div>
+      <div class="prog-wrap" id="rvProg" style="display:none">
+        <div class="prog-label"><span id="rvProgLbl">Uploading...</span><span id="rvProgPct">0%</span></div>
+        <div class="prog"><div class="prog-bar" id="rvProgBar"></div></div>
+      </div>
+      <button class="btn btn-gr" onclick="submitReview('${s.id}')" id="rvSubBtn">Submit Review →</button>
+    </div>`}
+  </div>`;
+}
+
+async function submitReview(sid){
+  const marks=fi('rvM'),total=fi('rvT'),grade=fi('rvG'),remarks=fi('rvR'),sugg=fi('rvSug'),str=fi('rvStr'),wk=fi('rvWk');
+  const rFile=document.getElementById('rvFile')?.files, rMat=document.getElementById('rvMat')?.files;
+  if(!marks) return toast('Please enter marks obtained');
+  if(!remarks) return toast('Please enter remarks');
+  if(!rFile?.length) return toast('Please upload the corrected paper');
+  const btn=document.getElementById('rvSubBtn'); btn.disabled=true; btn.textContent='Uploading...';
+  document.getElementById('rvProg').style.display='block';
+  const bar=document.getElementById('rvProgBar');
+  const setP=(p,l)=>{bar.style.width=(p*100)+'%';document.getElementById('rvProgPct').textContent=Math.round(p*100)+'%';document.getElementById('rvProgLbl').textContent=l;};
+  try{
+    setP(0,'Uploading corrected paper...');
+    const corrUrls=await upFiles(rFile,'submissions',`${sid}/corrected`,p=>setP(p*0.6,'Uploading corrected paper...'));
+    setP(0.6,'Uploading study materials...');
+    const matUrls=rMat?.length?await upFiles(rMat,'submissions',`${sid}/study-material`,p=>setP(0.6+p*0.35,'Uploading materials...')):[];
+    setP(0.95,'Saving review...');
+    await sb.from('submissions').update({
+      status:'reviewed', marks:Number(marks), total_marks:Number(total), grade, remarks, suggestions:sugg,
+      strengths:str, weak_areas:wk, reviewed_at:new Date().toISOString()
+    }).eq('id',sid);
+    const fRows=[...corrUrls.map(f=>({submission_id:sid,file_type:'corrected',...f})),...(matUrls||[]).map(f=>({submission_id:sid,file_type:'study_material',...f}))];
+    if(fRows.length) await sb.from('submission_files').insert(fRows);
+    await sb.from('audit_log').insert({action:'REVIEWED',submission_id:sid,details:`${adminProfile.name} reviewed — marks ${marks}/${total}`,by_name:adminProfile.name});
+    setP(1,'Done!');
+    const msg=`✅ *Review Submitted — NK Academy*\n\nReviewer: ${adminProfile.name}\nSubmission: ${sid}\nMarks: ${marks}/${total} | Grade: ${grade}\n\nPlease log in to the admin dashboard and notify the student.`;
+    toast('Review submitted successfully!');
+    window.open(`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`,'_blank');
+    btn.disabled=false; btn.textContent='Submit Review →';
+  }catch(e){toast('Error: '+e.message); btn.disabled=false; btn.textContent='Submit Review →';}
+}
+
+// ═══════════════════════════════
+// ADMIN: MATERIALS / STUDENTS / AUDIT
+// ═══════════════════════════════
+async function adMaterials(el){
+  el.innerHTML=`
+  <div class="card">
+    <h2>Upload Study Material</h2>
+    <div class="fr2">
+      <div class="fg"><label>Board</label><select class="fi" id="mB"><option value="">Select</option><option>Matriculation</option><option>CBSE</option><option>ICSE</option><option>All Boards</option></select></div>
+      <div class="fg"><label>Standard</label><select class="fi" id="mSt"><option value="">Select</option><option>9th</option><option>10th</option><option>11th</option><option>12th</option></select></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Subject</label><select class="fi" id="mSj"><option value="">Select</option>${SUBJS.map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <div class="fg"><label>Type</label><select class="fi" id="mTp"><option>Chapter Notes</option><option>Formula Sheet</option><option>Model Paper</option><option>Previous Year Paper</option><option>Reference Material</option></select></div>
+    </div>
+    <div class="fg"><label>Title</label><input class="fi" id="mTi" placeholder="e.g. Chapter 5 — Laws of Motion Notes"/></div>
+    <div class="uz"><input type="file" id="mF" onchange="previewF(this,'mFP','mFZ')"/><div class="uzico">📁</div><div class="uzlbl">Select file to upload</div></div>
+    <div class="file-list" id="mFP"></div>
+    <button class="btn btn-gd" style="margin-top:1rem" onclick="upMat()" id="mBtn">Upload Material</button>
+  </div>
+  <div class="card"><div class="ch"><span style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--nv)">Uploaded Materials</span></div><div id="matList"><div class="empty"><p>Loading...</p></div></div></div>`;
+  loadMats();
+}
+async function upMat(){
+  const b=fi('mB'),st=fi('mSt'),sj=fi('mSj'),tp=fi('mTp'),ti=fi('mTi'),f=document.getElementById('mF').files[0];
+  if(!b||!st||!sj||!ti||!f) return toast('Please fill all fields and select a file');
+  const btn=document.getElementById('mBtn'); btn.disabled=true; btn.textContent='Uploading...';
+  const urls=await upFiles([f],'materials',`${st}/${sj}`);
+  if(!urls.length){btn.disabled=false;btn.textContent='Upload Material';return;}
+  await sb.from('materials').insert({board:b,standard:st,subject:sj,type:tp,title:ti,file_name:f.name,file_path:urls[0].file_path,file_url:urls[0].file_url,uploaded_by:adminProfile.name});
+  toast('Material uploaded!');
+  document.getElementById('mF').value=''; document.getElementById('mFP').innerHTML=''; document.getElementById('mTi').value='';
+  btn.disabled=false; btn.textContent='Upload Material';
+  loadMats();
+}
+async function loadMats(){
+  const {data:mats}=await sb.from('materials').select('*').order('uploaded_at',{ascending:false}).limit(20);
+  if(!mats?.length){document.getElementById('matList').innerHTML='<div class="empty"><p>No materials yet</p></div>';return;}
+  document.getElementById('matList').innerHTML=mats.map(m=>`
+    <div class="fitem"><div class="ficon">📄</div><div class="fname">${m.title}</div><div style="font-size:11px;color:var(--mu);flex-shrink:0;text-align:right">${m.subject} | ${m.standard}</div>
+    <a href="${m.file_url}" target="_blank" class="btn btn-out btn-sm" style="flex-shrink:0">View</a></div>`).join('');
+}
+async function adStudents(el){
+  el.innerHTML=`<div class="card"><div class="ch"><span style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--nv)">All Submitting Students</span></div><div id="stList"><div class="empty"><p>Loading...</p></div></div></div>`;
+  const {data:all}=await sb.from('submissions').select('id,student_name,student_phone,student_email,standard,board,subjects,status,created_at').order('created_at',{ascending:false});
+  if(!all?.length){document.getElementById('stList').innerHTML='<div class="empty"><div class="ei">👥</div><p>No students yet</p></div>';return;}
+  let html='<table class="tbl"><thead><tr><th>Reference</th><th>Name</th><th>Mobile</th><th>Standard</th><th>Board</th><th>Subjects</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+  all.forEach(s=>{html+=`<tr><td style="font-family:'Cormorant Garamond',serif;font-weight:700">${s.id}</td><td><strong>${s.student_name}</strong></td><td>${s.student_phone}</td><td>${s.standard}</td><td>${s.board}</td><td>${(s.subjects||[]).join(', ')}</td><td style="white-space:nowrap">${fmtDate(s.created_at)}</td><td><span class="sbdg s-${s.status}">${s.status.replace(/_/g,' ').toUpperCase()}</span></td></tr>`;});
+  html+='</tbody></table>';
+  document.getElementById('stList').innerHTML=html;
+}
+async function adAudit(el){
+  el.innerHTML=`<div class="card"><div class="ch"><span style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--nv)">Audit Log</span><span style="font-size:12px;color:var(--mu)">All actions logged</span></div><div id="auList"><div class="empty"><p>Loading...</p></div></div></div>`;
+  const {data:logs}=await sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(80);
+  if(!logs?.length){document.getElementById('auList').innerHTML='<div class="empty"><p>No activity logged yet</p></div>';return;}
+  let html='<table class="tbl"><thead><tr><th>Action</th><th>Submission ID</th><th>Details</th><th>By</th><th>Time</th></tr></thead><tbody>';
+  logs.forEach(l=>{html+=`<tr><td><span class="sbdg s-submitted">${l.action}</span></td><td style="font-family:'Cormorant Garamond',serif;font-weight:700">${l.submission_id||'-'}</td><td>${l.details||'-'}</td><td>${l.by_name||'-'}</td><td style="white-space:nowrap">${fmtDate(l.created_at)}</td></tr>`;});
+  html+='</tbody></table>';
+  document.getElementById('auList').innerHTML=html;
+}
+
+// ── UTILS ──
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),4000); }
+function fmtDate(d){ return d?new Date(d).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-'; }
+</script>
+</body>
+</html>
