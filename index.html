@@ -82,9 +82,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(11,20,40,.9
 nav.top{top:35px}
 .nav-in{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:66px}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-m{width:40px;height:40px;background:linear-gradient(135deg,var(--gold-500),var(--gold-700));border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;flex-shrink:0}
-.logo-m::after{content:'';position:absolute;top:-30%;left:-30%;width:160%;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);transform:rotate(-25deg)}
-.logo-m span{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:18px;color:var(--navy-900);position:relative;z-index:1;letter-spacing:-1px}
+.logo-m{width:48px;height:48px;background:transparent;border-radius:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible;flex-shrink:0}
+.logo-m::after{display:none}
+.logo-m span{display:none}
+.logo-m img{width:48px;height:48px;object-fit:contain;display:block}
 .logo-n{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:19px;color:var(--white);line-height:1.1}
 .logo-n small{display:block;font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:500;color:var(--gold-400);letter-spacing:2px;text-transform:uppercase;margin-top:1px}
 .nav-l{display:flex;align-items:center;gap:3px}
@@ -260,6 +261,7 @@ section{padding:5rem 0;position:relative;z-index:1}
 .js-label{font-size:13px;font-weight:700;color:var(--navy-800)}
 .js-sub{font-size:11.5px;color:var(--text-mu);margin-top:2px;line-height:1.4}
 @media(max-width:900px){.review-layout{grid-template-columns:1fr;gap:2.5rem}}
+@media(max-width:600px){.logo-m img{width:40px;height:40px}.logo-m{width:40px;height:40px}.logo-n{font-size:16px}}
 
 /* ─── CAREER ─── */
 #career{background:var(--bg)}
@@ -408,7 +410,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <nav class="top">
 <div class="nav-in">
 <a class="logo" href="#hero">
-<div class="logo-m"><img src="index.png" alt="NK Academy Logo" style="width:36px;height:36px;object-fit:contain;border-radius:6px"/></div>
+<div class="logo-m"><img src="index.png" alt="NK Academy Logo"/></div>
 <div class="logo-n">NK Academy<small>Discipline · Clarity · Achievement</small></div>
 </a>
 <div class="ham" onclick="document.getElementById('navL').classList.toggle('open')"><span></span><span></span><span></span></div>
@@ -752,7 +754,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <div class="container">
 <div class="ft-top">
 <div class="ft-brand">
-<a class="logo" href="#hero" style="display:inline-flex"><div class="logo-m"><img src="index.png" alt="NK Academy Logo" style="width:36px;height:36px;object-fit:contain;border-radius:6px"/></div><div class="logo-n" style="font-size:17px">NK Academy<small>Discipline · Clarity · Achievement</small></div></a>
+<a class="logo" href="#hero" style="display:inline-flex"><div class="logo-m"><img src="index.png" alt="NK Academy Logo"/></div><div class="logo-n" style="font-size:17px">NK Academy<small>Discipline · Clarity · Achievement</small></div></a>
 <p>Expert coaching for 9th–12th Standard across Matric, CBSE & ICSE in Mayiladuthurai, Tamil Nadu. First 3 demo classes free.</p>
 </div>
 <div class="ft-col"><h4>Links</h4><ul><li><a href="#about">About</a></li><li><a href="#courses">Courses</a></li><li><a href="#faculty">Faculty</a></li><li><a href="#career">Career Guidance</a></li><li><a href="#materials">Study Materials</a></li><li><a href="#fees">Fee Structure</a></li></ul></div>
