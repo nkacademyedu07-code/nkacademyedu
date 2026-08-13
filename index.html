@@ -220,11 +220,46 @@ section{padding:5rem 0;position:relative;z-index:1}
 .fc{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.1);border-radius:18px;padding:2rem 1.3rem;text-align:center;transition:all .3s;position:relative;overflow:hidden}
 .fc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold-500),transparent);opacity:0;transition:opacity .3s}
 .fc:hover{background:rgba(255,255,255,.07);border-color:rgba(201,168,76,.3);transform:translateY(-4px)}.fc:hover::before{opacity:1}
+.fc:nth-child(4){grid-column:2}
 .fc-av{width:84px;height:84px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--navy-900);border:3px solid rgba(201,168,76,.3)}
 .fc-name{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.15rem;color:var(--white);margin-bottom:3px}
 .fc-q{font-size:12px;color:var(--silver-400);margin-bottom:8px;font-style:italic}
 .fc-s{display:inline-block;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);color:var(--gold-300);padding:4px 12px;border-radius:100px;font-size:11.5px;font-weight:700;letter-spacing:.3px}
-@media(max-width:600px){.fg{grid-template-columns:1fr}}
+@media(max-width:768px){.fg{grid-template-columns:repeat(2,1fr)}.fc:nth-child(4){grid-column:auto}}
+@media(max-width:480px){.fg{grid-template-columns:1fr}.fc:nth-child(4){grid-column:auto}}
+
+/* ─── PAPER REVIEW ─── */
+#review{background:var(--white);position:relative;overflow:hidden}
+#review::before{content:'';position:absolute;top:-120px;right:-120px;width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.review-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.review-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:var(--gold-700);padding:6px 16px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.2rem}
+.review-badge::before{content:'';width:6px;height:6px;background:var(--gold-500);border-radius:50%;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1;box-shadow:0 0 8px var(--gold-500)}}
+.review-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:700;color:var(--navy-900);line-height:1.1;margin-bottom:1rem}
+.review-title em{font-style:italic;color:var(--gold-600)}
+.review-tagline{font-size:1.15rem;font-weight:700;color:var(--navy-800);letter-spacing:.5px;margin-bottom:.8rem}
+.review-desc{font-size:14.5px;color:var(--text-mu);line-height:1.75;margin-bottom:1.8rem;max-width:520px}
+.review-cta-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.review-primary-btn{background:var(--navy-800);color:var(--gold-300);padding:14px 28px;border-radius:100px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:10px;text-decoration:none;transition:all .3s;border:none;cursor:pointer;font-family:inherit}
+.review-primary-btn:hover{background:var(--navy-900);transform:translateY(-2px);box-shadow:0 8px 24px rgba(10,14,39,.2)}
+.review-outline-btn{background:transparent;border:1.5px solid var(--silver-200);color:var(--text-mid);padding:13px 24px;border-radius:100px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:all .2s}
+.review-outline-btn:hover{border-color:var(--gold-400);color:var(--gold-600)}
+.review-features{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.8rem}
+.review-feature{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--text-mid);line-height:1.4}
+.rf-dot{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--gold-400),var(--gold-600));display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--white);flex-shrink:0;margin-top:1px;font-weight:700}
+.review-right{background:var(--bg);border-radius:20px;padding:2.2rem;border:1px solid var(--silver-100)}
+.journey-title{font-size:13px;font-weight:700;color:var(--navy-800);letter-spacing:.5px;text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:8px}
+.journey-title::before{content:'';width:20px;height:2px;background:var(--gold-500)}
+.journey-steps{display:flex;flex-direction:column;gap:0}
+.js-item{display:flex;gap:14px;position:relative;padding-bottom:1.2rem}
+.js-item:last-child{padding-bottom:0}
+.js-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:32px}
+.js-num{width:32px;height:32px;border-radius:50%;background:var(--navy-800);color:var(--gold-300);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;position:relative;z-index:1;flex-shrink:0}
+.js-line{width:2px;flex:1;background:var(--silver-100);margin-top:4px}
+.js-right{flex:1;padding-top:5px}
+.js-label{font-size:13px;font-weight:700;color:var(--navy-800)}
+.js-sub{font-size:11.5px;color:var(--text-mu);margin-top:2px;line-height:1.4}
+@media(max-width:900px){.review-layout{grid-template-columns:1fr;gap:2.5rem}}
 
 /* ─── CAREER ─── */
 #career{background:var(--bg)}
@@ -373,7 +408,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <nav class="top">
 <div class="nav-in">
 <a class="logo" href="#hero">
-<div class="logo-m"><span>NK</span></div>
+<div class="logo-m"><img src="logo.png" alt="NK Academy Logo" style="width:36px;height:36px;object-fit:contain;border-radius:6px"/></div>
 <div class="logo-n">NK Academy<small>Discipline · Clarity · Achievement</small></div>
 </a>
 <div class="ham" onclick="document.getElementById('navL').classList.toggle('open')"><span></span><span></span><span></span></div>
@@ -381,10 +416,11 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <a href="#about">About</a>
 <a href="#courses">Courses</a>
 <a href="#faculty">Faculty</a>
+<a href="#review" style="color:var(--gold-300)!important;font-weight:600!important">📝 Paper Review</a>
 <a href="#materials">Materials</a>
 <a href="#fees">Fees</a>
 <a href="#contact">Contact</a>
-<a href="portal.html" style="color:var(--gold-300)!important;background:rgba(201,168,76,.08)!important">🎓 Student Portal</a>
+<a href="portal.html#submit" style="color:var(--gold-300)!important;background:rgba(201,168,76,.08)!important">📝 Submit Paper</a>
 <a href="#" class="demo-badge" onclick="event.preventDefault();openModal()">3 FREE DEMO</a>
 <a href="#" class="nav-cta" onclick="event.preventDefault();openModal()">Enroll</a>
 </div>
@@ -471,7 +507,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <div class="sh c reveal"><div class="sl g">Why NK Academy</div><h2 class="st">What Makes Us <span class="em">Different</span></h2></div>
 <div class="why-g">
 <div class="wc reveal d1"><div class="wc-i" style="background:#FFF5E0">⭐</div><h3>Expert Faculty</h3><p>CA, engineers & postgraduate mentors with real-world expertise.</p></div>
-<div class="wc reveal d2"><div class="wc-i" style="background:#E8F5F0">📋</div><h3>Small Batches</h3><p>Personal attention always. Every student is individually tracked.</p></div>
+<div class="wc reveal d2"><div class="wc-i" style="background:#E8F5F0">🧭</div><h3>Career Guidance</h3><p>Personalised career path counselling — from subject selection to professional stream planning.</p></div>
 <div class="wc reveal d3"><div class="wc-i" style="background:#EDE5FF">🎯</div><h3>Concept Clarity</h3><p>Fundamentals to mastery. Strong foundations that last beyond exams.</p></div>
 <div class="wc reveal d4"><div class="wc-i" style="background:#E8F0FD">✅</div><h3>Regular Tests</h3><p>Weekly assessments to track progress and build exam confidence.</p></div>
 </div></div></section>
@@ -491,49 +527,113 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <div class="sc"><div class="sc-i" style="background:#E8F5F0">⚗️</div><div class="sc-n">Science</div><div class="sc-d">Physics, chemistry & biology combined</div></div>
 <div class="sc"><div class="sc-i" style="background:#FFF5E0">📖</div><div class="sc-n">Social Science</div><div class="sc-d">History, geography, civics & economics</div></div>
 <div class="sc"><div class="sc-i" style="background:#E8F0FD">✍️</div><div class="sc-n">English</div><div class="sc-d">Grammar, comprehension & writing</div></div>
+<div class="sc"><div class="sc-i" style="background:#FDEAEA">🌺</div><div class="sc-n">Tamil</div><div class="sc-d">Language, literature, grammar & writing</div></div>
 </div>
 <div class="bb"><span>Matriculation</span><span>CBSE</span><span>ICSE</span></div>
 <div class="cm"><div class="cm-i"><div class="cm-d"></div> Full Subject & Per Subject options</div><div class="cm-i"><div class="cm-d"></div> Weekly tests + doubt clearing</div></div>
 </div>
 <div id="p-11" class="tp reveal">
 <div class="sg">
-<div class="sc"><div class="sc-i" style="background:#EDE5FF">⚡</div><div class="sc-n">Physics</div><div class="sc-d">Mechanics, thermodynamics & optics</div><span class="sc-f">Faculty: Vimal Sir</span></div>
+<div class="sc"><div class="sc-i" style="background:#EDE5FF">⚡</div><div class="sc-n">Physics</div><div class="sc-d">Mechanics, thermodynamics & optics</div></div>
 <div class="sc"><div class="sc-i" style="background:#E8F5F0">⚗️</div><div class="sc-n">Chemistry</div><div class="sc-d">Organic, inorganic & physical chemistry</div></div>
-<div class="sc"><div class="sc-i" style="background:#FFF5E0">🧬</div><div class="sc-n">Biology</div><div class="sc-d">Cell biology, genetics & botany</div><span class="sc-f">Faculty: Subaraj Sir</span></div>
-<div class="sc"><div class="sc-i" style="background:#E8F0FD">📐</div><div class="sc-n">Mathematics</div><div class="sc-d">Calculus, matrices & probability</div><span class="sc-f">Faculty: Vimal Sir</span></div>
-<div class="sc"><div class="sc-i" style="background:#F0E8FD">💻</div><div class="sc-n">Computer Science</div><div class="sc-d">Programming, data structures & logic</div><span class="sc-f">Faculty: Vimal Sir</span></div>
-<div class="sc"><div class="sc-i" style="background:#FDE8F0">📊</div><div class="sc-n">Accountancy</div><div class="sc-d">Fundamentals + CA Foundation prep</div><span class="sc-f">Faculty: Dharani Sir (CA)</span></div>
-<div class="sc"><div class="sc-i" style="background:#F0F8E8">💼</div><div class="sc-n">Commerce</div><div class="sc-d">Business studies & practices</div><span class="sc-f">Faculty: Dharani Sir (CA)</span></div>
-<div class="sc"><div class="sc-i" style="background:#FFF0E0">📈</div><div class="sc-n">Economics</div><div class="sc-d">Micro & macroeconomics</div></div>
+<div class="sc"><div class="sc-i" style="background:#FFF5E0">🧬</div><div class="sc-n">Biology</div><div class="sc-d">Cell biology, genetics & botany</div></div>
+<div class="sc"><div class="sc-i" style="background:#E8F0FD">📐</div><div class="sc-n">Mathematics</div><div class="sc-d">Calculus, matrices & probability</div></div>
+<div class="sc"><div class="sc-i" style="background:#F0E8FD">💻</div><div class="sc-n">Computer Science</div><div class="sc-d">Programming, data structures & logic</div></div>
+<div class="sc"><div class="sc-i" style="background:#FDE8F0">📊</div><div class="sc-n">Accountancy</div><div class="sc-d">Fundamentals, ledgers & financial statements</div></div>
+<div class="sc"><div class="sc-i" style="background:#F0F8E8">💼</div><div class="sc-n">Commerce</div><div class="sc-d">Business studies & commercial practices</div></div>
+<div class="sc"><div class="sc-i" style="background:#FFF0E0">📈</div><div class="sc-n">Economics</div><div class="sc-d">Micro & macroeconomics concepts</div></div>
+<div class="sc"><div class="sc-i" style="background:#E8F0FD">✍️</div><div class="sc-n">English</div><div class="sc-d">Literature, comprehension & writing</div></div>
+<div class="sc"><div class="sc-i" style="background:#FDEAEA">🌺</div><div class="sc-n">Tamil</div><div class="sc-d">Language, literature & grammar</div></div>
 </div>
-<div class="bb"><span>Matriculation</span><span>CBSE</span></div>
-<div class="cm"><div class="cm-i"><div class="cm-d"></div> Science & Commerce streams</div><div class="cm-i"><div class="cm-d"></div> Computer Science group — by Vimal Sir</div><div class="cm-i"><div class="cm-d"></div> CA Foundation integrated</div></div>
+<div class="bb"><span>Matriculation</span><span>CBSE</span><span>ICSE</span></div>
+<div class="cm"><div class="cm-i"><div class="cm-d"></div> Maths Group · Bio-Maths Group · Commerce Group</div><div class="cm-i"><div class="cm-d"></div> Computer Science available as elective</div><div class="cm-i"><div class="cm-d"></div> All three boards covered</div></div>
 </div>
 <div id="p-12" class="tp reveal">
 <div class="sg">
-<div class="sc"><div class="sc-i" style="background:#EDE5FF">⚡</div><div class="sc-n">Physics</div><div class="sc-d">Board + competitive edge concepts</div><span class="sc-f">Faculty: Vimal Sir</span></div>
+<div class="sc"><div class="sc-i" style="background:#EDE5FF">⚡</div><div class="sc-n">Physics</div><div class="sc-d">Board exam focus + competitive concepts</div></div>
 <div class="sc"><div class="sc-i" style="background:#E8F5F0">⚗️</div><div class="sc-n">Chemistry</div><div class="sc-d">Full syllabus with numerical mastery</div></div>
-<div class="sc"><div class="sc-i" style="background:#FFF5E0">🧬</div><div class="sc-n">Biology</div><div class="sc-d">Board-focused + NEET concepts</div><span class="sc-f">Faculty: Subaraj Sir</span></div>
-<div class="sc"><div class="sc-i" style="background:#E8F0FD">📐</div><div class="sc-n">Mathematics</div><div class="sc-d">Integration, differentiation & algebra</div><span class="sc-f">Faculty: Vimal Sir</span></div>
-<div class="sc"><div class="sc-i" style="background:#F0E8FD">💻</div><div class="sc-n">Computer Science</div><div class="sc-d">Python, OOP & database concepts</div><span class="sc-f">Faculty: Vimal Sir</span></div>
-<div class="sc"><div class="sc-i" style="background:#FDE8F0">📊</div><div class="sc-n">Accountancy</div><div class="sc-d">Advanced accounting + CA boost</div><span class="sc-f">Faculty: Dharani Sir (CA)</span></div>
-<div class="sc"><div class="sc-i" style="background:#F0F8E8">💼</div><div class="sc-n">Commerce</div><div class="sc-d">Business law, finance & practices</div><span class="sc-f">Faculty: Dharani Sir (CA)</span></div>
+<div class="sc"><div class="sc-i" style="background:#FFF5E0">🧬</div><div class="sc-n">Biology</div><div class="sc-d">Board-focused with NEET-level clarity</div></div>
+<div class="sc"><div class="sc-i" style="background:#E8F0FD">📐</div><div class="sc-n">Mathematics</div><div class="sc-d">Integration, differentiation & algebra</div></div>
+<div class="sc"><div class="sc-i" style="background:#F0E8FD">💻</div><div class="sc-n">Computer Science</div><div class="sc-d">Python, OOP & database concepts</div></div>
+<div class="sc"><div class="sc-i" style="background:#FDE8F0">📊</div><div class="sc-n">Accountancy</div><div class="sc-d">Advanced accounting & financial reports</div></div>
+<div class="sc"><div class="sc-i" style="background:#F0F8E8">💼</div><div class="sc-n">Commerce</div><div class="sc-d">Business law, finance & practices</div></div>
 <div class="sc"><div class="sc-i" style="background:#FFF0E0">📈</div><div class="sc-n">Economics</div><div class="sc-d">Indian economy & macro theory</div></div>
+<div class="sc"><div class="sc-i" style="background:#E8F0FD">✍️</div><div class="sc-n">English</div><div class="sc-d">Literature, writing & board exam prep</div></div>
+<div class="sc"><div class="sc-i" style="background:#FDEAEA">🌺</div><div class="sc-n">Tamil</div><div class="sc-d">Language, literature & grammar</div></div>
 </div>
-<div class="bb"><span>Matriculation</span><span>CBSE</span></div>
-<div class="cm"><div class="cm-i"><div class="cm-d"></div> Board exam intensive prep</div><div class="cm-i"><div class="cm-d"></div> Model exams & paper analysis</div><div class="cm-i"><div class="cm-d"></div> Computer Science — by Vimal Sir</div></div>
+<div class="bb"><span>Matriculation</span><span>CBSE</span><span>ICSE</span></div>
+<div class="cm"><div class="cm-i"><div class="cm-d"></div> Maths Group · Bio-Maths Group · Commerce Group</div><div class="cm-i"><div class="cm-d"></div> Board exam intensive preparation</div><div class="cm-i"><div class="cm-d"></div> Model exams & answer paper analysis</div></div>
 </div>
 </div></section>
 
 <!-- FACULTY -->
 <section id="faculty" class="dark">
 <div class="container">
-<div class="sh c reveal"><div class="sl g">Our Educators</div><h2 class="st">Learn from <span style="color:var(--gold-400)">Industry Experts</span></h2><p class="ss">A CA, an Automation Engineer, and a Science specialist — real-world expertise, not just textbook knowledge.</p></div>
+<div class="sh c reveal"><div class="sl g">Our Educators</div><h2 class="st">Learn from <span style="color:var(--gold-400)">Industry Experts</span></h2><p class="ss">A CA, a CA Finalist, an Automation Engineer, and a Science postgraduate — every subject from Class 9 to 12 covered by a specialist.</p></div>
 <div class="fg reveal">
-<div class="fc"><div class="fc-av" style="background:linear-gradient(135deg,var(--gold-500),var(--gold-700))">DA</div><div class="fc-name">CA M. Dharani Anbu Selvan</div><div class="fc-q">Chartered Accountant</div><div class="fc-s">Commerce · Maths</div></div>
-<div class="fc"><div class="fc-av" style="background:linear-gradient(135deg,#5A8FD4,#1A4A8A)">VA</div><div class="fc-name">S. Vimal Aadhithiyan</div><div class="fc-q">B.E. EEE — Automation Engineer</div><div class="fc-s">Physics · Maths · CS</div></div>
+<div class="fc"><div class="fc-av" style="background:linear-gradient(135deg,#C9A84C,#8B6914)">DA</div><div class="fc-name">CA M. Dharani Anbu Selvan</div><div class="fc-q">Chartered Accountant · Founder</div><div class="fc-s">Commerce · Maths · CA Aspirants Guidance</div></div>
+<div class="fc"><div class="fc-av" style="background:linear-gradient(135deg,#FF6B4A,#C84020)">RD</div><div class="fc-name">R. Dhanesh</div><div class="fc-q">CA Finalist · Accounts Specialist</div><div class="fc-s">Accountancy · Commerce</div></div>
+<div class="fc"><div class="fc-av" style="background:linear-gradient(135deg,#5A8FD4,#1A4A8A)">VA</div><div class="fc-name">S. Vimal Aadhithiyan</div><div class="fc-q">B.E. EEE — Automation Engineer</div><div class="fc-s">Physics · Maths · Computer Science</div></div>
 <div class="fc"><div class="fc-av" style="background:linear-gradient(135deg,#4DB88A,#1A6E4A)">SJ</div><div class="fc-name">R. Subaraj</div><div class="fc-q">M.Sc. Agricultural Entomology</div><div class="fc-s">Biology · Science</div></div>
 </div></div></section>
+
+<!-- PAPER REVIEW SECTION -->
+<section id="review">
+<div class="container">
+<div class="review-layout">
+<!-- Left: Explanation -->
+<div class="reveal">
+  <div class="review-badge">✦ Value-Added Academic Service</div>
+  <h2 class="review-title">Go Beyond Marks —<br/>Understand Your <em>Performance</em></h2>
+  <div class="review-tagline">Submit. Analyse. Improve.</div>
+  <p class="review-desc">At NK Academy, students can submit their answer papers for expert review and receive structured, detailed feedback — not just a mark, but a complete picture of where they stand and how they can prepare better for their examinations.</p>
+  <div class="review-features">
+    <div class="review-feature"><div class="rf-dot">✓</div><span><strong>Strengths identified</strong> — know exactly which topics you've mastered</span></div>
+    <div class="review-feature"><div class="rf-dot">✓</div><span><strong>Weak areas highlighted</strong> — chapter and topic-wise gaps clearly marked</span></div>
+    <div class="review-feature"><div class="rf-dot">✓</div><span><strong>Question-wise mistake analysis</strong> — conceptual, calculation, or presentation errors</span></div>
+    <div class="review-feature"><div class="rf-dot">✓</div><span><strong>Accuracy & difficulty assessment</strong> — how you performed relative to paper difficulty</span></div>
+    <div class="review-feature"><div class="rf-dot">✓</div><span><strong>Improvement suggestions</strong> — specific study materials and revision topics recommended</span></div>
+    <div class="review-feature"><div class="rf-dot">✓</div><span><strong>No login required</strong> — simple upload, unique reference number, WhatsApp updates</span></div>
+  </div>
+  <div class="review-cta-row">
+    <a href="portal.html" class="review-primary-btn">📝 Submit Answer Paper for Review &rarr;</a>
+    <a href="portal.html#track" class="review-outline-btn">🔍 Track My Submission</a>
+  </div>
+</div>
+<!-- Right: Student Journey -->
+<div class="reveal" style="animation-delay:.15s">
+  <div class="review-right">
+    <div class="journey-title">How It Works</div>
+    <div class="journey-steps">
+      <div class="js-item">
+        <div class="js-left"><div class="js-num">1</div><div class="js-line"></div></div>
+        <div class="js-right"><div class="js-label">Submit Your Paper</div><div class="js-sub">Upload question paper, answer sheet & answer key on the portal — no login needed</div></div>
+      </div>
+      <div class="js-item">
+        <div class="js-left"><div class="js-num">2</div><div class="js-line"></div></div>
+        <div class="js-right"><div class="js-label">Get Your Reference Number</div><div class="js-sub">Instant unique reference number (e.g. NKA-20260801-0042) with WhatsApp confirmation</div></div>
+      </div>
+      <div class="js-item">
+        <div class="js-left"><div class="js-num">3</div><div class="js-line"></div></div>
+        <div class="js-right"><div class="js-label">Expert Review</div><div class="js-sub">Our subject specialist reviews your paper — usually within 3 working days</div></div>
+      </div>
+      <div class="js-item">
+        <div class="js-left"><div class="js-num">4</div><div class="js-line"></div></div>
+        <div class="js-right"><div class="js-label">WhatsApp Notification</div><div class="js-sub">You receive a WhatsApp message when your review is ready with your score and grade</div></div>
+      </div>
+      <div class="js-item">
+        <div class="js-left"><div class="js-num">5</div></div>
+        <div class="js-right"><div class="js-label">Download Feedback & Materials</div><div class="js-sub">View full feedback, download corrected paper, and access recommended study materials</div></div>
+      </div>
+    </div>
+    <div style="margin-top:1.6rem;padding:1rem;background:rgba(201,168,76,.08);border-radius:10px;border:1px solid rgba(201,168,76,.2);font-size:12.5px;color:var(--navy-700);line-height:1.5">
+      📌 <strong>This is not just a paper-upload facility.</strong> It is an academic performance analysis and improvement support system provided by NK Academy to help students grow with clarity.
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</section>
 
 <!-- CAREER GUIDANCE -->
 <section id="career">
@@ -550,7 +650,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <div class="ca-box">
 <h3>CA Foundation Program</h3>
 <p>For students aspiring to become Chartered Accountants, NK offers a dedicated foundation program integrated with 11th & 12th commerce coaching.</p>
-<p>Learn directly from a practicing CA who understands the exam pattern and the profession.</p>
+<p>Learn directly from a CA who understands the exam pattern and the profession.</p>
 <div class="ca-badge">📜 Taught by CA M. Dharani Anbu Selvan</div>
 </div>
 </div>
@@ -569,9 +669,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <div class="mat-note reveal">📌 Study materials and notes are provided free of cost to all enrolled NK students.</div>
 
 <!-- Study material uploads are managed via the Admin Portal -->
-<div class="mat-note reveal" style="background:var(--navy-800);color:var(--gold-300);border:none;margin-top:1rem">
-🎓 Enrolled students can access and download all study materials through the <a href="portal.html" style="color:var(--gold-l);text-decoration:underline;font-weight:700">Student Portal</a>
-</div>
+<!-- Materials available via portal -->
 </div></section>
 
 <!-- FEES -->
@@ -585,22 +683,25 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <button class="fee-tab" onclick="sfee('12f',this)">12th</button>
 </div>
 <div id="f-all" class="fp on reveal">
-<table class="ft"><thead><tr><th>Standard</th><th>CBSE Full</th><th>Matric Full</th><th>Per Subject</th></tr></thead><tbody>
-<tr><td><strong>9th & 10th</strong></td><td class="fa">₹1,000</td><td class="fa">₹1,000</td><td class="fa">₹500</td></tr>
-<tr><td><strong>11th</strong></td><td class="fa">₹2,500</td><td class="fa">₹2,000</td><td class="fa">₹600</td></tr>
-<tr><td><strong>12th</strong></td><td class="fa">₹3,000</td><td class="fa">₹2,200</td><td class="fa">₹800</td></tr>
+<table class="ft"><thead><tr><th>Standard</th><th>CBSE Full</th><th>Matric Full</th><th>ICSE Full</th><th>Per Subject</th></tr></thead><tbody>
+<tr><td><strong>9th & 10th</strong></td><td class="fa">₹1,000</td><td class="fa">₹1,000</td><td class="fa">₹1,000</td><td class="fa">₹500</td></tr>
+<tr><td><strong>11th</strong></td><td class="fa">₹2,500</td><td class="fa">₹2,000</td><td class="fa">₹2,500</td><td class="fa">₹600</td></tr>
+<tr><td><strong>12th</strong></td><td class="fa">₹3,000</td><td class="fa">₹2,200</td><td class="fa">₹3,000</td><td class="fa">₹800</td></tr>
 </tbody></table></div>
 <div id="f-910f" class="fp reveal"><table class="ft"><thead><tr><th>Board</th><th>Package</th><th>Monthly Fee</th></tr></thead><tbody>
 <tr><td>Matriculation</td><td>Full Subject</td><td class="fa">₹1,000</td></tr><tr><td>Matriculation</td><td>Per Subject</td><td class="fa">₹500</td></tr>
 <tr><td>CBSE</td><td>Full Subject</td><td class="fa">₹1,000</td></tr><tr><td>CBSE</td><td>Per Subject</td><td class="fa">₹500</td></tr>
+<tr><td>ICSE</td><td>Full Subject</td><td class="fa">₹1,000</td></tr><tr><td>ICSE</td><td>Per Subject</td><td class="fa">₹500</td></tr>
 </tbody></table></div>
 <div id="f-11f" class="fp reveal"><table class="ft"><thead><tr><th>Board</th><th>Package</th><th>Monthly Fee</th></tr></thead><tbody>
 <tr><td>CBSE</td><td>Full Subject</td><td class="fa">₹2,500</td></tr><tr><td>CBSE</td><td>Per Subject</td><td class="fa">₹600</td></tr>
 <tr><td>Matriculation</td><td>Full Subject</td><td class="fa">₹2,000</td></tr><tr><td>Matriculation</td><td>Per Subject</td><td class="fa">₹600</td></tr>
+<tr><td>ICSE</td><td>Full Subject</td><td class="fa">₹2,500</td></tr><tr><td>ICSE</td><td>Per Subject</td><td class="fa">₹600</td></tr>
 </tbody></table></div>
 <div id="f-12f" class="fp reveal"><table class="ft"><thead><tr><th>Board</th><th>Package</th><th>Monthly Fee</th></tr></thead><tbody>
 <tr><td>CBSE</td><td>Full Subject</td><td class="fa">₹3,000</td></tr><tr><td>CBSE</td><td>Per Subject</td><td class="fa">₹800</td></tr>
 <tr><td>Matriculation</td><td>Full Subject</td><td class="fa">₹2,200</td></tr><tr><td>Matriculation</td><td>Per Subject</td><td class="fa">₹800</td></tr>
+<tr><td>ICSE</td><td>Full Subject</td><td class="fa">₹3,000</td></tr><tr><td>ICSE</td><td>Per Subject</td><td class="fa">₹800</td></tr>
 </tbody></table></div>
 <div class="fn reveal">
 <p>All fees are monthly — paid by the 5th of every month</p>
@@ -638,7 +739,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <p style="font-size:12.5px;color:var(--text-mu);margin-bottom:1.2rem">Fill the form and it will open WhatsApp with your details — ready to send directly to NK Academy.</p>
 <div class="fi"><label>Student / Parent Name</label><input type="text" id="enqName" placeholder="Your full name"/></div>
 <div class="fi"><label>Mobile Number</label><input type="tel" id="enqPhone" placeholder="e.g. 9876543210"/></div>
-<div class="fi"><label>Standard</label><select id="enqStd"><option value="">Select Standard</option><option>9th</option><option>10th</option><option>11th – Science</option><option>11th – Commerce</option><option>12th – Science</option><option>12th – Commerce</option></select></div>
+<div class="fi"><label>Standard</label><select id="enqStd"><option value="">Select Standard</option><option>9th</option><option>10th</option><option>11th – Biology</option><option>11th – Computer Science</option><option>11th – Accountancy</option><option>11th – Mathematics</option><option>12th – Biology</option><option>12th – Computer Science</option><option>12th – Accountancy</option><option>12th – Mathematics</option></select></div>
 <div class="fi"><label>Board</label><select id="enqBoard"><option value="">Select Board</option><option>Matriculation</option><option>CBSE</option><option>ICSE</option></select></div>
 <div class="fi"><label>Message (optional)</label><textarea id="enqMsg" placeholder="Any questions..."></textarea></div>
 <button class="sub-btn sub-wa" onclick="sendEnquiry()"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Send Enquiry via WhatsApp</button>
@@ -651,7 +752,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <div class="container">
 <div class="ft-top">
 <div class="ft-brand">
-<a class="logo" href="#hero" style="display:inline-flex"><div class="logo-m"><span>NK</span></div><div class="logo-n" style="font-size:17px">NK Academy<small>Discipline · Clarity · Achievement</small></div></a>
+<a class="logo" href="#hero" style="display:inline-flex"><div class="logo-m"><img src="logo.png" alt="NK Academy Logo" style="width:36px;height:36px;object-fit:contain;border-radius:6px"/></div><div class="logo-n" style="font-size:17px">NK Academy<small>Discipline · Clarity · Achievement</small></div></a>
 <p>Expert coaching for 9th–12th Standard across Matric, CBSE & ICSE in Mayiladuthurai, Tamil Nadu. First 3 demo classes free.</p>
 </div>
 <div class="ft-col"><h4>Links</h4><ul><li><a href="#about">About</a></li><li><a href="#courses">Courses</a></li><li><a href="#faculty">Faculty</a></li><li><a href="#career">Career Guidance</a></li><li><a href="#materials">Study Materials</a></li><li><a href="#fees">Fee Structure</a></li></ul></div>
@@ -680,7 +781,7 @@ footer{background:var(--navy-950);color:var(--silver-400);padding:3rem 0 1.2rem;
 <p>First 3 classes are FREE — experience NK before you enroll!</p>
 <div class="fi"><label>Student Name</label><input type="text" id="mName" placeholder="Full name"/></div>
 <div class="fi"><label>Parent's Mobile</label><input type="tel" id="mPhone" placeholder="e.g. 9876543210"/></div>
-<div class="fi"><label>Standard</label><select id="mStd"><option value="">Select</option><option>9th</option><option>10th</option><option>11th – Science</option><option>11th – Commerce</option><option>12th – Science</option><option>12th – Commerce</option></select></div>
+<div class="fi"><label>Standard</label><select id="mStd"><option value="">Select</option><option>9th</option><option>10th</option><option>11th – Biology</option><option>11th – Computer Science</option><option>11th – Accountancy</option><option>11th – Mathematics</option><option>12th – Biology</option><option>12th – Computer Science</option><option>12th – Accountancy</option><option>12th – Mathematics</option></select></div>
 <div class="fi"><label>Board</label><select id="mBoard"><option value="">Select</option><option>Matriculation</option><option>CBSE</option><option>ICSE</option></select></div>
 <button class="sub-btn sub-wa" onclick="submitDemo()"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Book Demo via WhatsApp</button>
 </div>
