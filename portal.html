@@ -495,6 +495,8 @@ const sb = createClient(SURL, SKEY);
 let adminUser = null, adminProfile = null;
 let curRefId = '', curAC = '', curPhone = '', curName = '';
 let selSubjs = [];
+let rvSavedRef = '', rvSavedAC = '', rvLoaded = false;
+const ADMIN_NOTIFY_KEY = 'YOUR_CALLMEBOT_KEY'; // Replace with your CallMeBot API key
 const SUBJS = ['Mathematics','Physics','Chemistry','Biology','Computer Science','Accountancy','Commerce','Economics','English'];
 
 // ── INIT ──
@@ -619,6 +621,7 @@ async function doSubmit(){
     if(fileRows.length) await sb.from('submission_files').insert(fileRows);
     await sb.from('audit_log').insert({action:'SUBMITTED',submission_id:refId,details:`${name} submitted ${selSubjs.join(', ')}`,by_name:name});
     setProgress(1,'Done!');
+    notifyAdmin(refId, name, phone, selSubjs);
 
     document.getElementById('showRefId').textContent=refId;
     document.getElementById('showAC').textContent=ac;
@@ -631,6 +634,13 @@ async function doSubmit(){
 }
 function fi(id){return document.getElementById(id)?.value?.trim()||'';}
 function showFErr(msg){const e=document.getElementById('subErrMsg');e.textContent=msg;e.style.display='block';document.getElementById('subBtn').disabled=false;document.getElementById('subBtn').textContent='Submit for Review →';document.getElementById('subProgWrap').style.display='none';}
+
+function notifyAdmin(refId, studentName, phone, subjects){
+  const msg = `🔔 *New Paper Submission — NK Academy*\n\nRef: ${refId}\nStudent: ${studentName}\nPhone: ${phone}\nSubjects: ${subjects.join(', ')}\n\nLogin to Admin Panel to review:\nnkacademyedu.com/portal.html`;
+  if(ADMIN_NOTIFY_KEY && ADMIN_NOTIFY_KEY !== 'YOUR_CALLMEBOT_KEY'){
+    fetch(`https://api.callmebot.com/whatsapp.php?phone=${WA}&text=${encodeURIComponent(msg)}&apikey=${ADMIN_NOTIFY_KEY}`, {mode:'no-cors'}).catch(()=>{});
+  }
+}
 
 function sendStudentWA(){
   const dt=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
@@ -968,12 +978,19 @@ async function adReviewer(el){
     <button class="btn btn-nv" onclick="loadReview()" id="rvLoadBtn">Load Paper →</button>
   </div>
   <div id="rvContent"></div>`;
+  // Restore previously loaded paper automatically
+  if(rvSavedRef && rvSavedAC){
+    document.getElementById('rvRef').value = rvSavedRef;
+    document.getElementById('rvAC').value = rvSavedAC;
+    await loadReview(true);
+  }
 }
 
-async function loadReview(){
+async function loadReview(silent=false){
   const ref=fi('rvRef').toUpperCase(), ac=fi('rvAC');
-  if(!ref||!ac) return toast('Please enter Reference Number and Access Code');
+  if(!ref||!ac) return silent?null:toast('Please enter Reference Number and Access Code');
   const btn=document.getElementById('rvLoadBtn'); btn.disabled=true; btn.textContent='Loading...';
+  rvSavedRef=ref; rvSavedAC=ac;
   const {data:s,error}=await sb.from('submissions').select('*').eq('id',ref).single();
   btn.disabled=false; btn.textContent='Load Paper →';
   if(error||!s) return toast('Submission not found. Check the reference number.');
@@ -998,9 +1015,9 @@ function renderReviewForm(s, files){
       <div><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</div>
     </div>
     <div style="background:var(--bg);border-radius:10px;padding:1rem;margin-bottom:1.2rem;font-size:13px;line-height:2.5">
-      <strong>Question Paper:</strong> ${byType('question_paper')||'None'}<br/>
-      <strong>Answer Sheet:</strong> ${byType('answer_sheet')||'None'}<br/>
-      <strong>Answer Key:</strong> ${byType('answer_key')||'Not provided'}
+      <strong>Question Paper:</strong> ${byType('question_paper')||'<span style="color:var(--rd)">Not uploaded</span>'}<br/>
+      <strong>Answer Sheet:</strong> ${byType('answer_sheet')||'<span style="color:var(--rd)">Not uploaded</span>'}<br/>
+      <strong>Answer Key:</strong> ${byType('answer_key')||'<span style="color:var(--mu)">Not provided</span>'}
     </div>
     ${isDone?`<div style="background:var(--grb);padding:1.2rem;border-radius:10px;margin-bottom:1rem">
       <strong>✅ Already Reviewed</strong> — Marks: ${s.marks}/${s.total_marks} | Grade: ${s.grade}
