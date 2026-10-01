@@ -224,6 +224,47 @@ img{max-width:100%}
   .wrap,.wrap-wide{padding:1.2rem 1rem}
   .card{padding:1.3rem}
 }
+
+/* ── DOC CARDS ── */
+.doc-section{margin:1.2rem 0}
+.doc-section-title{font-size:11px;font-weight:700;color:var(--mi);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.8rem;display:flex;align-items:center;justify-content:space-between}
+.doc-count{font-size:10px;color:var(--mu);font-weight:600;background:var(--bg);border:1px solid var(--br);padding:2px 8px;border-radius:100px}
+.doc-card{border:1.5px solid var(--br);border-radius:12px;overflow:hidden;margin-bottom:.7rem;transition:box-shadow .2s}
+.doc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+.doc-card-head{padding:.7rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br)}
+.doc-card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mi)}
+.doc-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;letter-spacing:.2px}
+.db-ok{background:var(--grb);color:var(--gr)}
+.db-missing{background:var(--rdb);color:var(--rd)}
+.db-optional{background:var(--blb);color:var(--bl)}
+.doc-card-body{padding:.8rem 1rem;background:var(--wh)}
+.doc-file-row{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.doc-file-row:last-child{margin-bottom:0}
+.doc-ficon{width:36px;height:36px;border-radius:8px;background:var(--g100);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.doc-fname{font-size:12.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.doc-fext{font-size:10px;font-weight:700;color:var(--mu);background:var(--bg);padding:2px 6px;border-radius:4px;flex-shrink:0}
+.doc-card-actions{padding:.6rem 1rem;border-top:1px solid var(--br);background:var(--bg);display:flex;gap:6px;flex-wrap:wrap}
+.doc-empty-body{padding:1rem;text-align:center}
+.doc-empty-icon{font-size:1.6rem;margin-bottom:.3rem}
+.doc-empty-msg{font-size:12.5px;color:var(--mu)}
+.doc-card-missing{border-color:rgba(226,75,74,.25)}
+.doc-card-missing .doc-card-head{background:var(--rdb)}
+.doc-card-optional .doc-card-head{background:var(--blb)}
+.doc-type-badge{font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;background:rgba(201,168,76,.15);color:var(--gd);border:1px solid rgba(201,168,76,.3);letter-spacing:.3px}
+
+/* ── PREVIEW MODAL ── */
+.pv-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9990;overflow-y:auto;padding:1.5rem}
+.pv-inner{max-width:960px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.pv-head{background:var(--nv);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.pv-meta{min-width:0}
+.pv-type{font-size:10px;color:var(--gdl);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.pv-fname{color:#fff;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+.pv-acts{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.pv-body{min-height:60vh;background:#f0f0f0}
+.pv-body iframe{width:100%;height:80vh;border:none;display:block}
+.pv-body img{max-width:100%;max-height:80vh;object-fit:contain;display:block;margin:0 auto}
+.pv-no-preview{padding:3rem;text-align:center;color:var(--mu)}
+@media(max-width:768px){.doc-card-actions{gap:4px}.doc-card-actions .btn{font-size:11px;padding:6px 10px}.pv-fname{max-width:160px}}
 </style>
 </head>
 <body>
@@ -480,6 +521,24 @@ img{max-width:100%}
   </div>
 </div>
 
+<!-- ══ PREVIEW MODAL ══ -->
+<div class="pv-modal" id="pvModal" onclick="pvBgClick(event)">
+  <div class="pv-inner">
+    <div class="pv-head">
+      <div class="pv-meta">
+        <div class="pv-type" id="pvType">Document</div>
+        <div class="pv-fname" id="pvName">file.pdf</div>
+      </div>
+      <div class="pv-acts">
+        <a id="pvOpen" href="#" target="_blank" rel="noopener" class="btn btn-out btn-sm" style="border-color:rgba(255,255,255,.3);color:#fff">↗ Open</a>
+        <a id="pvDl" href="#" download class="btn btn-gd btn-sm">⬇ Download</a>
+        <button onclick="closePreview()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:700;font-size:14px">✕</button>
+      </div>
+    </div>
+    <div class="pv-body" id="pvBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -551,19 +610,24 @@ async function genRefId(){
 function genAC(){ return String(Math.floor(100000+Math.random()*899999)); }
 
 // ── UPLOAD FILES ──
+// Returns {results, errors} — callers must check errors for required uploads
 async function upFiles(fileList, bucket, prefix, onProg){
-  const results=[]; const files=Array.from(fileList);
+  const results=[]; const errors=[]; const files=Array.from(fileList);
   for(let i=0;i<files.length;i++){
     const f=files[i];
-    if(f.size>25*1024*1024){toast(`Skipped (>25MB): ${f.name}`);continue;}
-    const path=`${prefix}/${Date.now()}_${i}_${f.name.replace(/[^\w.-]/g,'_')}`;
-    const {error}=await sb.storage.from(bucket).upload(path,f,{cacheControl:'3600',upsert:false});
-    if(error){toast(`Upload error: ${error.message}`);continue;}
+    if(f.size>25*1024*1024){errors.push({name:f.name,reason:'Exceeds 25 MB limit'});continue;}
+    const allowed=['pdf','jpg','jpeg','png','gif','webp'];
+    const ext=(f.name.split('.').pop()||'').toLowerCase();
+    if(!allowed.includes(ext)){errors.push({name:f.name,reason:'File type not allowed (use PDF/JPG/PNG)'});continue;}
+    const safeName=f.name.replace(/[^\w.\-]/g,'_');
+    const path=`${prefix}/${Date.now()}_${i}_${safeName}`;
+    const {error}=await sb.storage.from(bucket).upload(path,f,{cacheControl:'3600',upsert:false,contentType:f.type||'application/octet-stream'});
+    if(error){errors.push({name:f.name,reason:error.message});continue;}
     const {data:u}=sb.storage.from(bucket).getPublicUrl(path);
     results.push({file_name:f.name,file_path:path,file_url:u.publicUrl});
     if(onProg) onProg((i+1)/files.length);
   }
-  return results;
+  return {results,errors};
 }
 
 // ── PROGRESS ──
@@ -599,11 +663,19 @@ async function doSubmit(){
     curRefId=refId; curAC=ac; curPhone=phone; curName=name;
 
     setProgress(0,'Uploading question paper...');
-    const qpUrls=await upFiles(qpF,'submissions',`${refId}/question-paper`,p=>setProgress(p*0.33,'Uploading question paper...'));
+    const qpRes=await upFiles(qpF,'submissions',`${refId}/question-paper`,p=>setProgress(p*0.33,'Uploading question paper...'));
+    if(qpRes.errors.length){
+      throw new Error('Question paper could not be uploaded — '+qpRes.errors.map(e=>'"'+e.name+'": '+e.reason).join('; ')+'. Please check your connection and try again.');
+    }
     setProgress(0.33,'Uploading answer sheet...');
-    const asUrls=await upFiles(asF,'submissions',`${refId}/answer-sheet`,p=>setProgress(0.33+p*0.33,'Uploading answer sheet...'));
+    const asRes=await upFiles(asF,'submissions',`${refId}/answer-sheet`,p=>setProgress(0.33+p*0.33,'Uploading answer sheet...'));
+    if(asRes.errors.length){
+      throw new Error('Answer sheet could not be uploaded — '+asRes.errors.map(e=>'"'+e.name+'": '+e.reason).join('; ')+'. Please check your connection and try again.');
+    }
     setProgress(0.66,'Uploading answer key...');
-    const akUrls=akF.length?await upFiles(akF,'submissions',`${refId}/answer-key`,p=>setProgress(0.66+p*0.2,'Uploading answer key...')):[];
+    const akRes=akF.length?await upFiles(akF,'submissions',`${refId}/answer-key`,p=>setProgress(0.66+p*0.2,'Uploading answer key...')):({results:[],errors:[]});
+    // Answer key is optional — log any error but don't block
+    if(akRes.errors.length) console.warn('Answer key upload partial:',akRes.errors);
     setProgress(0.9,'Saving submission...');
 
     const {error:se}=await sb.from('submissions').insert({
@@ -614,11 +686,14 @@ async function doSubmit(){
     if(se) throw se;
 
     const fileRows=[
-      ...qpUrls.map(f=>({submission_id:refId,file_type:'question_paper',...f})),
-      ...asUrls.map(f=>({submission_id:refId,file_type:'answer_sheet',...f})),
-      ...akUrls.map(f=>({submission_id:refId,file_type:'answer_key',...f})),
+      ...qpRes.results.map(f=>({submission_id:refId,file_type:'question_paper',...f})),
+      ...asRes.results.map(f=>({submission_id:refId,file_type:'answer_sheet',...f})),
+      ...akRes.results.map(f=>({submission_id:refId,file_type:'answer_key',...f})),
     ];
-    if(fileRows.length) await sb.from('submission_files').insert(fileRows);
+    if(fileRows.length){
+      const{error:fe}=await sb.from('submission_files').insert(fileRows);
+      if(fe) throw fe;
+    }
     await sb.from('audit_log').insert({action:'SUBMITTED',submission_id:refId,details:`${name} submitted ${selSubjs.join(', ')}`,by_name:name});
     setProgress(1,'Done!');
     notifyAdmin(refId, name, phone, selSubjs);
@@ -636,10 +711,21 @@ function fi(id){return document.getElementById(id)?.value?.trim()||'';}
 function showFErr(msg){const e=document.getElementById('subErrMsg');e.textContent=msg;e.style.display='block';document.getElementById('subBtn').disabled=false;document.getElementById('subBtn').textContent='Submit for Review →';document.getElementById('subProgWrap').style.display='none';}
 
 function notifyAdmin(refId, studentName, phone, subjects){
-  const msg = `🔔 *New Paper Submission — NK Academy*\n\nRef: ${refId}\nStudent: ${studentName}\nPhone: ${phone}\nSubjects: ${subjects.join(', ')}\n\nLogin to Admin Panel to review:\nnkacademyedu.com/portal.html`;
-  if(ADMIN_NOTIFY_KEY && ADMIN_NOTIFY_KEY !== 'YOUR_CALLMEBOT_KEY'){
-    fetch(`https://api.callmebot.com/whatsapp.php?phone=${WA}&text=${encodeURIComponent(msg)}&apikey=${ADMIN_NOTIFY_KEY}`, {mode:'no-cors'}).catch(()=>{});
-  }
+  fetch('https://api.resend.com/emails',{
+    method:'POST',
+    headers:{'Authorization':'Bearer re_BTDbiCsk_4hWh6191SVa3hM9tBUXFDfbj','Content-Type':'application/json'},
+    body:JSON.stringify({
+      from:'NK Academy <onboarding@resend.dev>',
+      to:['dsclaude71@gmail.com'],
+      subject:`📋 New Paper: ${refId} — ${studentName}`,
+      html:`<h2>New Paper Submission — NK Academy</h2>
+            <p><b>Reference:</b> ${refId}</p>
+            <p><b>Student:</b> ${studentName}</p>
+            <p><b>Phone:</b> ${phone}</p>
+            <p><b>Subjects:</b> ${subjects.join(', ')}</p>
+            <br/><a href="https://nkacademyedu.com/portal.html">→ Open Admin Panel</a>`
+    })
+  }).catch(()=>{});
 }
 
 function sendStudentWA(){
@@ -883,16 +969,16 @@ async function adManage(sid){
   const {data:s}=await sb.from('submissions').select('*').eq('id',sid).single();
   const {data:files}=await sb.from('submission_files').select('*').eq('submission_id',sid);
   const {data:revs}=await sb.from('reviewer_profiles').select('*');
-  const byType=(t)=>(files||[]).filter(f=>f.file_type===t).map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-out btn-sm" style="margin:3px">File ${i+1}</a>`).join('');
   const revOpts=(revs||[]).map(r=>`<option value="${r.id}|${r.name}|${r.phone||''}">${r.name}</option>`).join('');
   const isDone=s.status==='reviewed'||s.status==='completed';
   const waStudent=`🏆 *Review Completed — NK Academy*\n\nHi ${s.student_name}!\n\nYour paper has been reviewed.\n\n📋 Reference: ${s.id}\n📊 Marks: ${s.marks||'-'}/${s.total_marks||'-'} | Grade: ${s.grade||'-'}\n\n${s.remarks?`💬 ${s.remarks}\n`:''}\nTrack and download: www.nkacademyedu.com/portal.html\n\nFor support: 6369603854`;
 
   const el=document.getElementById('adMain');
   el.innerHTML=`
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap">
     <button class="btn btn-out btn-sm" onclick="adNav('allsubs',document.querySelectorAll('.adm-btn')[1])">← Back</button>
     <span style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--nv)">${sid}</span>
+    <span class="doc-type-badge">📝 PAPER ANALYSIS</span>
     <span class="sbdg s-${s.status}">${s.status.replace(/_/g,' ').toUpperCase()}</span>
   </div>
   <div class="card">
@@ -906,12 +992,7 @@ async function adManage(sid){
       <div style="font-size:11px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Reviewer Access Code</div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--pu);letter-spacing:5px">${s.access_code}</div>
     </div>
-    <div style="margin:1rem 0;line-height:2.4;font-size:13px">
-      <strong>Question Paper:</strong> ${byType('question_paper')||'<span style="color:var(--mu)">None</span>'}<br/>
-      <strong>Answer Sheet:</strong> ${byType('answer_sheet')||'<span style="color:var(--mu)">None</span>'}<br/>
-      <strong>Answer Key:</strong> ${byType('answer_key')||'<span style="color:var(--mu)">Not provided</span>'}
-      ${isDone?`<br/><strong>Corrected Paper:</strong> ${byType('corrected')||'<span style="color:var(--mu)">Not uploaded yet</span>'}`:''}
-    </div>
+    ${docSectionHtml(files||[],isDone)}
     ${!isDone?`
     <div style="border-top:1px solid var(--br);padding-top:1.2rem">
       <div style="font-size:14px;font-weight:700;margin-bottom:.8rem">Assign to Reviewer</div>
@@ -1001,7 +1082,6 @@ async function loadReview(silent=false){
 }
 
 function renderReviewForm(s, files){
-  const byType=(t)=>files.filter(f=>f.file_type===t).map((f,i)=>`<a href="${f.file_url}" target="_blank" class="btn btn-out btn-sm" style="margin:3px">📄 View File ${i+1}</a>`).join('');
   const isDone=s.status==='reviewed'||s.status==='completed';
   document.getElementById('rvContent').innerHTML=`
   <div class="card">
@@ -1014,11 +1094,7 @@ function renderReviewForm(s, files){
       <div><strong>Mobile:</strong> ${s.student_phone}</div>
       <div><strong>Subjects:</strong> ${(s.subjects||[]).join(', ')}</div>
     </div>
-    <div style="background:var(--bg);border-radius:10px;padding:1rem;margin-bottom:1.2rem;font-size:13px;line-height:2.5">
-      <strong>Question Paper:</strong> ${byType('question_paper')||'<span style="color:var(--rd)">Not uploaded</span>'}<br/>
-      <strong>Answer Sheet:</strong> ${byType('answer_sheet')||'<span style="color:var(--rd)">Not uploaded</span>'}<br/>
-      <strong>Answer Key:</strong> ${byType('answer_key')||'<span style="color:var(--mu)">Not provided</span>'}
-    </div>
+    ${docSectionHtml(files,false)}
     ${isDone?`<div style="background:var(--grb);padding:1.2rem;border-radius:10px;margin-bottom:1rem">
       <strong>✅ Already Reviewed</strong> — Marks: ${s.marks}/${s.total_marks} | Grade: ${s.grade}
       <div style="font-size:13px;margin-top:.5rem;color:var(--mi)">${s.remarks||''}</div>
@@ -1146,6 +1222,100 @@ async function adAudit(el){
   html+='</tbody></table>';
   document.getElementById('auList').innerHTML=html;
 }
+
+// ═══════════════════════════════
+// DOCUMENT CARDS HELPERS
+// ═══════════════════════════════
+function fileExt(name){ return ((name||'').split('.').pop()||'').toLowerCase(); }
+function fileIcon(name){ const e=fileExt(name); return e==='pdf'?'📄':['jpg','jpeg','png','gif','webp'].includes(e)?'🖼️':'📎'; }
+function canPreviewFile(name){ const e=fileExt(name); return ['pdf','jpg','jpeg','png','gif','webp'].includes(e); }
+
+// Build one document card (admin/reviewer view)
+function docCardHtml(files, type, label, required){
+  const typeFiles=(files||[]).filter(f=>f.file_type===type);
+  if(!typeFiles.length){
+    if(!required){
+      return `<div class="doc-card doc-card-optional">
+        <div class="doc-card-head">
+          <span class="doc-card-label">${label}</span>
+          <span class="doc-badge db-optional">— Optional · Not provided</span>
+        </div>
+        <div class="doc-empty-body"><div class="doc-empty-icon" style="opacity:.4">📂</div><div class="doc-empty-msg">Not submitted by student</div></div>
+      </div>`;
+    }
+    return `<div class="doc-card doc-card-missing">
+      <div class="doc-card-head">
+        <span class="doc-card-label">${label}</span>
+        <span class="doc-badge db-missing">⚠ Required · Missing</span>
+      </div>
+      <div class="doc-empty-body"><div class="doc-empty-icon">⚠️</div><div class="doc-empty-msg" style="color:var(--rd)">Required document not found in this submission</div></div>
+    </div>`;
+  }
+  const filesHtml=typeFiles.map((f,i)=>{
+    const ext=fileExt(f.file_name); const icon=fileIcon(f.file_name); const canPv=canPreviewFile(f.file_name);
+    const safeName=(f.file_name||'Document '+(i+1)).replace(/'/g,"\\'");
+    const safeUrl=(f.file_url||'').replace(/'/g,"\\'");
+    const safeExt=ext.replace(/'/g,"\\'");
+    return `<div class="doc-file-row">
+      <div class="doc-ficon">${icon}</div>
+      <div class="doc-fname" title="${f.file_name||''}">${f.file_name||'Document '+(i+1)}</div>
+      <div class="doc-fext">${ext.toUpperCase()}</div>
+    </div>
+    <div class="doc-card-actions">
+      ${canPv?`<button class="btn btn-out btn-sm" onclick="openPreview('${safeUrl}','${safeName}','${label}','${safeExt}')">👁 Preview</button>`:''}
+      <a href="${f.file_url||'#'}" target="_blank" rel="noopener" class="btn btn-bl btn-sm">↗ Open</a>
+      <a href="${f.file_url||'#'}" download="${f.file_name||''}" class="btn btn-nv btn-sm">⬇ Download</a>
+    </div>`;
+  }).join('<hr style="border:none;border-top:1px solid var(--br);margin:0"/>');
+  return `<div class="doc-card">
+    <div class="doc-card-head">
+      <span class="doc-card-label">${label}</span>
+      <span class="doc-badge db-ok">✓ Uploaded · ${typeFiles.length} file${typeFiles.length>1?'s':''}</span>
+    </div>
+    <div class="doc-card-body">${filesHtml}</div>
+  </div>`;
+}
+
+function docSectionHtml(files, showCorrected){
+  const qpCount=(files||[]).filter(f=>f.file_type==='question_paper').length;
+  const asCount=(files||[]).filter(f=>f.file_type==='answer_sheet').length;
+  const akCount=(files||[]).filter(f=>f.file_type==='answer_key').length;
+  const provided=[qpCount>0,asCount>0,akCount>0].filter(Boolean).length;
+  return `<div class="doc-section">
+    <div class="doc-section-title">Documents Submitted <span class="doc-count">${provided} of ${akCount?3:2} provided</span></div>
+    ${docCardHtml(files,'question_paper','Question Paper',true)}
+    ${docCardHtml(files,'answer_sheet','Answer Sheet',true)}
+    ${docCardHtml(files,'answer_key','Answer Key',false)}
+    ${showCorrected?docCardHtml(files,'corrected','Corrected Paper (Reviewer Upload)',false):''}
+  </div>`;
+}
+
+// ── PREVIEW MODAL ──
+function openPreview(url, filename, docType, ext){
+  document.getElementById('pvType').textContent=docType||'Document';
+  document.getElementById('pvName').textContent=filename||'File';
+  document.getElementById('pvOpen').href=url;
+  document.getElementById('pvDl').href=url;
+  document.getElementById('pvDl').download=filename||'download';
+  const body=document.getElementById('pvBody');
+  const isImg=['jpg','jpeg','png','gif','webp'].includes(ext);
+  const isPdf=ext==='pdf';
+  if(isPdf){
+    body.innerHTML=`<iframe src="${url}#toolbar=1" title="${filename}"></iframe>`;
+  } else if(isImg){
+    body.innerHTML=`<div style="padding:1rem;text-align:center;background:#222"><img src="${url}" alt="${filename}" style="max-width:100%;max-height:80vh;object-fit:contain;border-radius:8px"/></div>`;
+  } else {
+    body.innerHTML=`<div class="pv-no-preview"><div style="font-size:3rem;margin-bottom:1rem">📎</div><p>Preview not available for this file type.</p><br/><a href="${url}" target="_blank" class="btn btn-bl">Open File</a></div>`;
+  }
+  document.getElementById('pvModal').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closePreview(){
+  document.getElementById('pvModal').style.display='none';
+  document.getElementById('pvBody').innerHTML='';
+  document.body.style.overflow='';
+}
+function pvBgClick(e){ if(e.target===document.getElementById('pvModal')) closePreview(); }
 
 // ── UTILS ──
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),4000); }
