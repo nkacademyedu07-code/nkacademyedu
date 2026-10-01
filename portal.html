@@ -1135,10 +1135,16 @@ async function submitReview(sid){
   const bar=document.getElementById('rvProgBar');
   const setP=(p,l)=>{bar.style.width=(p*100)+'%';document.getElementById('rvProgPct').textContent=Math.round(p*100)+'%';document.getElementById('rvProgLbl').textContent=l;};
   try{
+    // Fetch student details for WhatsApp notification
+    const {data:subData}=await sb.from('submissions').select('student_name,student_phone,subjects,standard,board').eq('id',sid).single();
+    const stuName=subData?.student_name||'Student';
+    const stuPhone='91'+(subData?.student_phone||'');
+
     setP(0,'Uploading corrected paper...');
-    const corrUrls=await upFiles(rFile,'submissions',`${sid}/corrected`,p=>setP(p*0.6,'Uploading corrected paper...'));
+    const {results:corrUrls,errors:corrErrs}=await upFiles(rFile,'submissions',`${sid}/corrected`,p=>setP(p*0.6,'Uploading corrected paper...'));
+    if(corrErrs.length) return toast('Upload failed: '+corrErrs[0].reason);
     setP(0.6,'Uploading study materials...');
-    const matUrls=rMat?.length?await upFiles(rMat,'submissions',`${sid}/study-material`,p=>setP(0.6+p*0.35,'Uploading materials...')):[];
+    const {results:matUrls}=rMat?.length?await upFiles(rMat,'submissions',`${sid}/study-material`,p=>setP(0.6+p*0.35,'Uploading materials...')):({results:[],errors:[]});
     setP(0.95,'Saving review...');
     await sb.from('submissions').update({
       status:'reviewed', marks:Number(marks), total_marks:Number(total), grade, remarks, suggestions:sugg,
@@ -1148,9 +1154,18 @@ async function submitReview(sid){
     if(fRows.length) await sb.from('submission_files').insert(fRows);
     await sb.from('audit_log').insert({action:'REVIEWED',submission_id:sid,details:`${adminProfile.name} reviewed — marks ${marks}/${total}`,by_name:adminProfile.name});
     setP(1,'Done!');
-    const msg=`✅ *Review Submitted — NK Academy*\n\nReviewer: ${adminProfile.name}\nSubmission: ${sid}\nMarks: ${marks}/${total} | Grade: ${grade}\n\nPlease log in to the admin dashboard and notify the student.`;
-    toast('Review submitted successfully!');
-    window.open(`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`,'_blank');
+
+    // WhatsApp message to STUDENT
+    const stuMsg=`✅ *Your Answer Paper Review is Complete — NK Academy*\n\nDear ${stuName},\n\nYour answer paper has been reviewed and your results are ready!\n\n📋 Submission ID: ${sid}\n📊 Marks: ${marks}/${total} | Grade: ${grade}\n💬 Remarks: ${remarks}\n\n🔍 *View your corrected paper & full feedback:*\n👉 nkacademyedu.com/portal.html\n\nGo to "Track Paper", enter your Submission ID and Mobile Number to view your corrected answer sheet and detailed review.\n\n— CA M. Dharani Anbu Selvan\nNK Academy, Mayiladuthurai`;
+
+    // WhatsApp message to ADMIN (self-notification)
+    const adminMsg=`✅ *Review Submitted — NK Academy*\n\nReviewer: ${adminProfile.name}\nSubmission: ${sid}\nStudent: ${stuName}\nMarks: ${marks}/${total} | Grade: ${grade}`;
+
+    toast('Review submitted! Opening WhatsApp to notify student...');
+    // Open student notification first
+    window.open(`https://wa.me/${stuPhone}?text=${encodeURIComponent(stuMsg)}`,'_blank');
+    // Admin self-notification after a brief delay
+    setTimeout(()=>window.open(`https://wa.me/${WA}?text=${encodeURIComponent(adminMsg)}`,'_blank'),1500);
     btn.disabled=false; btn.textContent='Submit Review →';
   }catch(e){toast('Error: '+e.message); btn.disabled=false; btn.textContent='Submit Review →';}
 }
@@ -1182,8 +1197,8 @@ async function upMat(){
   const b=fi('mB'),st=fi('mSt'),sj=fi('mSj'),tp=fi('mTp'),ti=fi('mTi'),f=document.getElementById('mF').files[0];
   if(!b||!st||!sj||!ti||!f) return toast('Please fill all fields and select a file');
   const btn=document.getElementById('mBtn'); btn.disabled=true; btn.textContent='Uploading...';
-  const urls=await upFiles([f],'materials',`${st}/${sj}`);
-  if(!urls.length){btn.disabled=false;btn.textContent='Upload Material';return;}
+  const {results:urls,errors:urlErrs}=await upFiles([f],'materials',`${st}/${sj}`);
+  if(urlErrs.length||!urls.length){btn.disabled=false;btn.textContent='Upload Material';toast(urlErrs[0]?.reason||'Upload failed');return;}
   await sb.from('materials').insert({board:b,standard:st,subject:sj,type:tp,title:ti,file_name:f.name,file_path:urls[0].file_path,file_url:urls[0].file_url,uploaded_by:adminProfile.name});
   toast('Material uploaded!');
   document.getElementById('mF').value=''; document.getElementById('mFP').innerHTML=''; document.getElementById('mTi').value='';
