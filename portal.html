@@ -711,20 +711,9 @@ function fi(id){return document.getElementById(id)?.value?.trim()||'';}
 function showFErr(msg){const e=document.getElementById('subErrMsg');e.textContent=msg;e.style.display='block';document.getElementById('subBtn').disabled=false;document.getElementById('subBtn').textContent='Submit for Review →';document.getElementById('subProgWrap').style.display='none';}
 
 function notifyAdmin(refId, studentName, phone, subjects){
-  fetch('https://api.resend.com/emails',{
-    method:'POST',
-    headers:{'Authorization':'Bearer re_QwpNriNn_Ct88pPaMhPWnVjH2R44bf82f','Content-Type':'application/json'},
-    body:JSON.stringify({
-      from:'NK Academy <onboarding@resend.dev>',
-      to:['dsclaude71@gmail.com'],
-      subject:`📋 New Paper: ${refId} — ${studentName}`,
-      html:`<h2>New Paper Submission — NK Academy</h2>
-            <p><b>Reference:</b> ${refId}</p>
-            <p><b>Student:</b> ${studentName}</p>
-            <p><b>Phone:</b> ${phone}</p>
-            <p><b>Subjects:</b> ${subjects.join(', ')}</p>
-            <br/><a href="https://nkacademyedu.com/portal.html">→ Open Admin Panel</a>`
-    })
+  // Email sent via Supabase Edge Function — no API key in client code
+  sb.functions.invoke('notify-admin',{
+    body:{ refId, studentName, phone, subjects }
   }).catch(()=>{});
 }
 
